@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+
+	<div class="ui form-user center raised very padded text container segment">
+		<form class="ui form" action="/user/signin" method="post">
+			<h4 class="ui dividing header">Login</h4>
+	    	{{ m.render_field(form.email) }}
+	    	{{ m.render_field(form.password) }}
+		  	{{ form.csrf_token }}
+		  	<button class="ui primary button" type="submit" id="submit">Confirm</button>
+		  	<a href="/user/forgot">
+			  	<div class="ui floated right basic red button">
+	        		I forgot my password
+	    		</div>
+	    	</a>
+	    	<a href="/user/resend">
+	    		<div class="ui floated right basic red button">
+	        		Resend email verification
+	    		</div>
+	    	</a>
+		</form>
+	</div>
+    <script type=text/javascript>
+        $(document).ready(function(){
+            $('#submit').click(function(){
+                $(this).addClass('loading');
+            });
+        })
+    </script>
+
+{% endblock %}

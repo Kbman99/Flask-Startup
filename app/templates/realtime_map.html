@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    {{ super() }}
+    <!-- Leaflet CSS -->
+{#<script>L_PREFER_CANVAS = true;</script>#}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+  integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+  crossorigin=""/>
+    <!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+  integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+  crossorigin=""></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.js"></script>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.0/chartist.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.2/moment.js"></script>
+<link rel="stylesheet" href="https://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.Default.css" />
+<script src="https://leaflet.github.io/Leaflet.markercluster/dist/leaflet.markercluster-src.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-realtime/2.1.1/leaflet-realtime.js"></script>
+    <!-- Map style -->
+    <style>
+    #map{
+        height: calc(100% - 140px);
+        width: calc(100% - 80px);
+        position:absolute !important;
+        margin: 10px;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+    <h1>{{ title }}</h1>
+
+    {% if current_user.is_authenticated %}
+        <h2 class="ui header">Hi {{ current_user.name }}!</h2>
+    {% endif %}
+
+    <div id="map"></div>
+    {#    <canvas id='chart' width="800" height="600"></canvas>#}
+{#    <div class="ct-chart ct-perfect-fourth"></div>#}
+    </div>
+    <script>
+        // The first parameter are the coordinates of the center of the map
+        // The second parameter is the zoom level
+{#        var mymap = L.map('map').setView([38.0000,-97.0000], 5);#}
+        var mymap = L.map('map', {center: [35.0545, -85.28], zoom: 12}),
+            realtime = L.realtime({
+                url: 'https://wanderdrone.appspot.com/',
+                crossOrigin: true,
+                type: 'json'
+            }, {
+                interval: 5 * 1000,
+                getFeatureId: function(f) {
+                    return f.id;
+                }
+            }).addTo(mymap);
+
+
+        realtime.on('update', function(f) {
+            mymap.fitBounds(realtime.getBounds(), {maxZoom: 3});
+            // Coords are reversed???
+            coords = f.features.undefined.geometry.coordinates;
+            coords.reverse();
+            console.log(coords);
+            polyline.addLatLng(coords);
+            //console.log(polyline.getLatLngs());
+            polyline.redraw();
+        });
+
+        // {s}, {z}, {x} and {y} are placeholders for map tiles
+        // {x} and {y} are the x/y of where you are on the map
+        // {z} is the zoom level
+        // {s} is the subdomain of cartodb
+        var layer = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; ' +
+            '<a href="http://cartodb.com/attributions">CartoDB</a>'
+        });
+
+
+        // Add the layer onto the map
+        mymap.addLayer(layer);
+
+        var polyline = L.polyline([], {color: 'red'}).addTo(mymap);
+
+{##}
+{#        var markers = L.markerClusterGroup({#}
+{#            chunkLoading: true#}
+{#        });#}
+{##}
+{#        markers.on('click', function (a) {#}
+{#            console.log('marker ' + a.layer);#}
+{#        });#}
+{##}
+{#        markers.on('clusterclick', function (a) {#}
+{#            // a.layer is actually a cluster#}
+{#            console.log('cluster ' + a.layer.getAllChildMarkers().length);#}
+{#        });#}
+{##}
+{#        var markerList = [];#}
+{#        var latlngs = [];#}
+{##}
+{#        {%  for i in range(100) %}#}
+{#            var title = "<strong><h3>Title!<h3></strong>" +#}
+{#                        "<ul>" +#}
+{#                        "<li> Details!</li>" +#}
+{#                        "</ul>";#}
+{#                var marker = L.marker([{{ i }}, {{ i }}]);#}
+{#            marker.bindPopup(title);#}
+{#            markerList.push(marker);#}
+{#            latlngs.push([{{ i }}, {{ i }}]);#}
+{#        {% endfor %}#}
+{#        var polyline = L.polyline(latlngs, {color: 'red'}).addTo(mymap);#}
+{##}
+{#        markers.addLayers(markerList);#}
+{#        mymap.addLayer(markers);#}
+
+    </script>
+
+{% endblock %}

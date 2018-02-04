@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="ui grid">
+    <div class="row"></div>
+    <div class="row"></div>
+        <div class="row">
+            <div class="two wide column"></div>
+            <div class="seven wide mobile five wide computer column">
+                <div class="ui header" style="font-size:40px">Welcome to Flask-Startup</div>
+            </div>
+        </div>
+        <div class="row"></div>
+        <div class="row">
+            <div class="fourteen wide mobile ten wide computer center aligned centered column">
+                <p id="intro" style="font-size:22px;line-height:2">
+                    This is a starter template whose purpose serves to get you up and running with a working
+                    Flask application using logging, users, email confirmation and more! Enjoy!
+                    <br>
+                </p>
+            </div>
+        </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.compatibility.min.js"></script>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="ui grid">
+    <div class="row"></div>
+    <div class="row"></div>
+{#    {% if not current_user.is_authenticated %}#}
+        <div class="row">
+            <div class="two wide column"></div>
+            <div class="seven wide mobile five wide computer column">
+                <div class="ui header" style="font-size:40px">FAQ</div>
+            </div>
+        </div>
+        <div class="row"></div>
+        <div class="row">
+        {#        <div class="four wide column"></div>#}
+            <div class="fourteen wide mobile twelve wide computer left aligned centered column">
+                <h2 class="ui horizontal divider header">Important Terms</h2>
+                <h3 class="ui header">Denial of Service Attack</h3>
+                <p id="terms" style="font-size:18px;line-height:2">
+
+                </p>
+                <h3 class="ui header">IP Spoofing</h3>
+                <p id="spoofing" style="font-size:18px;line-height:2">
+                    This is the creation of Internet Protocol packets with "spoofed" or fake source IPs in order to hide
+                    the true identity of the attacker.
+                </p>
+                <h3 class="ui header">Backscatter</h3>
+                <p id="backscatter" style="font-size:18px;line-height:2">
+                    Backscatter is the result of IP Spoofing. When a victim receives a packet from an attacker who uses a
+                    fraudulent source IP, depending on the packet/attack type, the victim will send a packet back to
+                    the spoofed IP which was not the actual source of the attack. These response packets are what's called
+                    backscatter and is the key to our research.
+                </p>
+                <h3 class="ui header">Dark IP Space</h3>
+                <p id="darkip" style="font-size:18px;line-height:2">
+                    Dark IP spaces are collections of IPs which don't actually lead anywhere. They are akin to physical
+                    addresses which have no business/building/house or anything build on them. In some cases, when an attacker
+                    uses a spoofed address, it may be that the spoofed address is a dark IP which leads to nowhere. In our
+                    research we use dark IP spaces to collect backscatter packets from victims of DDoS attacks in order to infer
+                    that a denial-of-service attack occurred.
+                </p>
+                <h2 class="ui horizontal divider header">The algorithm</h2>
+                <p id="algorithm" style="font-size:20px;line-height:2">
+                    As expressed in the research paper <a href="http://www.dtic.mil/dtic/tr/fulltext/u2/a400003.pdf">
+                    Inferring internet denial-of-service activity</a>, there are two methods to identifying/inferring
+                    denial-of-service activity.
+                    <br><br>
+                    The first method is <b>Flow-based classification</b> wherein a flow is
+                    described as consecutive packets received by a victim (In our case using a dark net, we receive packets
+                    from the victim as responses to the received packets supposed source IP which has been spoofed). The
+                    flow has a set timeout and it begins/resets to five minutes upon receiving another packet from the same
+                    source to the same destination. Once the timeout is reached, the flow is analyzed to check whether it contains
+                    100 packets and a duration of at least 60 seconds. There is also further classification through identifying
+                    flags which have been set for each given protocol type.
+                    <br><br>
+                    The next method is <b>Event-based classification</b>. This type is very similar to flow-based classification
+                    but it is different in that it uses set time frames, as opposed to dynamic flows, that do not reset
+                    upon new packets. You essentially choose a set timeout of 60s and any packets received by any destination
+                    from any source is added. Every new packet retrieved you simply identify the protocol and increment how
+                    many were received. At the end of each time frame each set of source -> destination IP mappings is checked
+                    to see if they had more than 10 of a single packet type in the 60s time frame. If so, then a denial-of-service
+                    attack is said to have occurred in that time frame.
+                    <br><br>
+                    I chose to use <b>Event-based classification</b> because it seemed to be much more straight forward and provide
+                    very similar results to flow-based. The first part of implementing this algorithm was to create the time frame
+                    object which holds a dictionary which maps a Destination IP: Source IP (Dark IP: Victim IP). These time frame
+                    objects only created the mappings when need by. So as an example, if our dark IP 10.0.0.2 received a TCP packet
+                    from a source/victim IP of 10.0.0.10, we create a new mapping in the current time frame object from
+                    10.0.0.2: 10.0.0.10 and increment that mappings TCP attribute to show that we received a TCP Packet. This process
+                    is repeated for every single packet in a time frame and and the end of the 60s time frame we analyze all the
+                    mappings and identify the DDoS occurrences then add them to a list.
+                    <br><br>
+                    There are a few quirks we have to figure out. For a victim of UDP flooding, in almost every case, they
+                    will respond with an ICMP packet and flag ICMP_PORT_UNREACH. So we had to adjust our counting for this.
+                    <br><br>
+                    This is the basic idea of inferring a denial-of-service attack using backscatter analysis.
+                </p>
+                <br>
+            </div>
+        </div>
+</div>
+{% endblock %}
