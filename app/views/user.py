@@ -1,20 +1,27 @@
-from flask import Blueprint, render_template, redirect, url_for, abort, flash
+from flask import Blueprint, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import login_user, logout_user, login_required
 
-from app import app, models, db
+from app.core import db
+from app import models
 from app.forms import user as user_forms
 from app.toolbox import email
+from flask import current_app
+
+import app
 
 from itsdangerous import URLSafeTimedSerializer
 
-# Serializer for generating random tokens
-ts = URLSafeTimedSerializer(app.config['SECRET_KEY'])
-
 # Create a user blueprint
-userbp = Blueprint('userbp', __name__, url_prefix='/user')
+user = Blueprint('user', __name__, url_prefix='/user')
 
 
-@userbp.route('/signup', methods=['GET', 'POST'])
+@user.record
+def setup(state):
+    # Serializer for generating random tokens
+    ts = URLSafeTimedSerializer(state.app.config['SECRET_KEY'])
+
+
+@user.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = user_forms.SignUp()
     if form.validate_on_submit():
@@ -32,7 +39,7 @@ def signup():
         # Subject of the confirmation email
         subject = 'Please confirm your email address.'
         # Generate a random token
-        token = ts.dumps(user.email, salt='email-confirm-key')
+        token = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).dumps(user.email, salt='email-confirm-key')
         # Build a confirm link with token
         confirmUrl = url_for('userbp.confirm', token=token, _external=True)
         # Render an HTML template to send by email
@@ -46,10 +53,10 @@ def signup():
     return render_template('user/signup.html', form=form, title='Sign up')
 
 
-@userbp.route('/confirm/<token>', methods=['GET', 'POST'])
+@user.route('/confirm/<token>', methods=['GET', 'POST'])
 def confirm(token):
     try:
-        email = ts.loads(token, salt='email-confirm-key', max_age=86400)
+        email = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).loads(token, salt='email-confirm-key', max_age=86400)
     # The token can either expire or be invalid
     except:
         abort(404)
@@ -65,7 +72,7 @@ def confirm(token):
     return redirect(url_for('userbp.signin'))
 
 
-@userbp.route('/signin', methods=['GET', 'POST'])
+@user.route('/signin', methods=['GET', 'POST'])
 def signin():
     form = user_forms.Login()
     if form.validate_on_submit():
@@ -83,18 +90,18 @@ def signin():
                 return redirect(url_for('userbp.signin'))
         else:
             flash('Unknown email address.', 'negative')
-            return redirect(url_for('userbp.signin'))
+            return redirect(url_for('user.signin'))
     return render_template('user/signin.html', form=form, title='Sign in')
 
 
-@userbp.route('/signout')
+@user.route('/signout')
 def signout():
     logout_user()
     flash('Succesfully signed out.', 'positive')
     return redirect(url_for('index'))
 
 
-@userbp.route('/resend', methods=['GET', 'POST'])
+@user.route('/resend', methods=['GET', 'POST'])
 def resend():
     form = user_forms.Resend()
     if form.validate_on_submit():
@@ -103,9 +110,9 @@ def resend():
         if user is not None:
             subject = 'Please confirm your email address.'
             # Generate a random token
-            token = ts.dumps(user.email, salt='email-confirm-key')
+            token = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).dumps(user.email, salt='email-confirm-key')
             # Build a confirm link with token
-            confirmUrl = url_for('userbp.confirm', token=token, _external=True)
+            confirmUrl = url_for('user.confirm', token=token, _external=True)
             # Render an HTML template to send by email
             html = render_template('email/confirm.html',
                                    confirm_url=confirmUrl)
@@ -121,13 +128,13 @@ def resend():
     return render_template('user/resend.html', form=form)
 
 
-@userbp.route('/account')
+@user.route('/account')
 @login_required
 def account():
     return render_template('user/account.html', title='Account')
 
 
-@userbp.route('/forgot', methods=['GET', 'POST'])
+@user.route('/forgot', methods=['GET', 'POST'])
 def forgot():
     form = user_forms.Forgot()
     if form.validate_on_submit():
@@ -137,9 +144,9 @@ def forgot():
             # Subject of the confirmation email
             subject = 'Reset your password.'
             # Generate a random token
-            token = ts.dumps(user.email, salt='password-reset-key')
+            token = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).dumps(user.email, salt='password-reset-key')
             # Build a reset link with token
-            resetUrl = url_for('userbp.reset', token=token, _external=True)
+            resetUrl = url_for('user.reset', token=token, _external=True)
             # Render an HTML template to send by email
             html = render_template('email/reset.html', reset_url=resetUrl)
             # Send the email to user
@@ -149,14 +156,14 @@ def forgot():
             return redirect(url_for('index'))
         else:
             flash('Unknown email address.', 'negative')
-            return redirect(url_for('userbp.forgot'))
+            return redirect(url_for('user.forgot'))
     return render_template('user/forgot.html', form=form)
 
 
-@userbp.route('/reset/<token>', methods=['GET', 'POST'])
+@user.route('/reset/<token>', methods=['GET', 'POST'])
 def reset(token):
     try:
-        email = ts.loads(token, salt='password-reset-key', max_age=86400)
+        email = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).loads(token, salt='password-reset-key', max_age=86400)
     # The token can either expire or be invalid
     except Exception:
         abort(404)
@@ -170,8 +177,8 @@ def reset(token):
             db.session.commit()
             # Send to the signin page
             flash('Your password has been reset, you can sign in.', 'positive')
-            return redirect(url_for('userbp.signin'))
+            return redirect(url_for('user.signin'))
         else:
             flash('Unknown email address.', 'negative')
-            return redirect(url_for('userbp.forgot'))
+            return redirect(url_for('user.forgot'))
     return render_template('user/reset.html', form=form, token=token)

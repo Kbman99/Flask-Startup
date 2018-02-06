@@ -2,14 +2,15 @@ from flask import Blueprint, render_template, redirect, url_for, abort, flash, j
 import json
 import sys
 
-from app import app, models, db
+from app import models
+from app.core import db
 from app.schemas import data
 from app.toolbox import validate
 
-api_bp = Blueprint('api_bp', __name__, '/api')
+api = Blueprint('api', __name__, '/api')
 
 
-@api_bp.route('/api/add_data', methods=['POST'])
+@api.route('/api/add_data', methods=['POST'])
 # @validate.validate_schema(data.new_data)
 def add_data():
     print(request, file=sys.stderr)
@@ -23,7 +24,7 @@ def add_data():
     return jsonify(dict(msg='data saved!'))
 
 
-@api_bp.route('/api/get_data', methods=['GET'])
+@api.route('/api/get_data', methods=['GET'])
 def get_data():
     data = retrieve_data()
     return jsonify(dict(msg=data))

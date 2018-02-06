@@ -24,10 +24,10 @@
 				<title>{{ title }}</title>
 				<!-- Navbar -->
 				<div class="ui attached inverted menu">
-				  	{{ m.nav_link('index', 'Home') }}
-                    {{ m.nav_link('map', 'Map') }}
-                    {{ m.nav_link('faq', 'FAQ') }}
-					{{ m.nav_link('contact', 'Contact') }}
+				  	{{ m.nav_link('home.index', 'Home') }}
+                    {{ m.nav_link('home.map', 'Map') }}
+                    {{ m.nav_link('home.faq', 'FAQ') }}
+					{{ m.nav_link('home.contact', 'Contact') }}
 				 		<!-- User is logged in -->
 				      	{% if current_user.is_authenticated %}
                             <div class="right menu">

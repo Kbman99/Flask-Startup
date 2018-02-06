@@ -34,3 +34,5 @@ CLIENT_AUTH_TIMEOUT = 9999 # in Hours
 
 LOG_LEVEL = logging.INFO
 LOG_FILENAME = 'activity.log'
+
+DEBUG_TB_INTERCEPT_REDIRECTS = False

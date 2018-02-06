@@ -1,4 +1,4 @@
-from flask.ext.wtf import Form
+from flask_wtf import Form
 from wtforms import TextField, PasswordField
 from wtforms.validators import (Required, Length, Email, ValidationError,
                                 EqualTo)
@@ -7,14 +7,14 @@ from app.models import User
 
 class Unique(object):
 
-    '''
+    """
     Custom validator to check an object's attribute
     is unique. For example users should not be able
     to create an account if the account's email
     address is already in the database. This class
     supposes you are using SQLAlchemy to query the
     database.
-    '''
+    """
 
     def __init__(self, model, field, message):
         self.model = model
@@ -29,7 +29,7 @@ class Unique(object):
 
 class Forgot(Form):
 
-    ''' User forgot password form. '''
+    """ User forgot password form. """
 
     email = TextField(validators=[Required(), Email()],
                       description='Email address')
@@ -37,7 +37,7 @@ class Forgot(Form):
 
 class Resend(Form):
 
-    ''' User forgot password form. '''
+    """ User forgot password form. """
 
     email = TextField(validators=[Required(), Email()],
                       description='Email address')
@@ -45,7 +45,7 @@ class Resend(Form):
 
 class Reset(Form):
 
-    ''' User reset password form. '''
+    """ User reset password form. """
 
     password = PasswordField(validators=[
         Required(), Length(min=6),
@@ -56,7 +56,7 @@ class Reset(Form):
 
 class Login(Form):
 
-    ''' User login form. '''
+    """ User login form. """
 
     email = TextField(validators=[Required(), Email()],
                       description='Email address')
@@ -66,12 +66,12 @@ class Login(Form):
 
 class SignUp(Form):
 
-    ''' User sign up form. '''
+    """ User sign up form. """
 
     first_name = TextField(validators=[Required(), Length(min=2)],
-                     description='Name')
+                           description='First Name')
     last_name = TextField(validators=[Required(), Length(min=2)],
-                        description='Surname')
+                          description='Last Name')
     email = TextField(validators=[Required(), Email(),
                                   Unique(User, User.email,
                                          'This email address is ' +

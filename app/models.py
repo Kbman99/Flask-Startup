@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 
 from flask_login import UserMixin
 
-from app import db, bcrypt
+from .core import db, bcrypt
 
 
 class User(db.Model, UserMixin):
