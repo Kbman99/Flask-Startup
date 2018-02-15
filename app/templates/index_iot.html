@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="ui inverted verticle masthead center aligned segment" style="padding-top: 10%;min-height: 500px">
+        <div class="ui text container">
+            <h1 class="ui inverted header">
+                LoRa Beacon Base
+            </h1>
+            <h2 class="ui inverted header" style="line-height:2">
+                Location services for the world of IoT
+            </h2>
+        </div>
+    </div>
+    <div class="ui grid">
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row">
+            <div class="two wide column"></div>
+            <div class="seven wide mobile five wide computer column">
+{#                <div class="ui header" style="font-size:40px">LoRa Beacon Base</div>#}
+            </div>
+        </div>
+        <div class="row"></div>
+        <div class="row">
+            <div class="three wide column right floated">
+                <img class="ui image" src="http://www.i-real.nl/eng/wp-content/uploads/sites/2/2016/04/LoRa.png">
+            </div>
+            <div class="twelve wide mobile eight wide computer center aligned centered column">
+                <p id="intro" style="font-size:22px;line-height:2">
+                    Whatever your use case, LoRa Beacon Base serves to help you manage your LoRa beacons and gateways
+                    to provide tracking and notifications in real time. Our goal is to provide peace of mind whether you
+                    provide LoRa Beacon devices to hikers at a park, have a stationary unit
+                    or you wanna keep track of your pet. We're here to help.
+                    <br>
+                </p>
+            </div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.compatibility.min.js"></script>
+    </div>
+{% endblock %}

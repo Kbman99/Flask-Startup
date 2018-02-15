@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_bcrypt import Bcrypt
+from flask_apscheduler import APScheduler
 
 debug_toolbar = DebugToolbarExtension()
 
@@ -14,9 +15,11 @@ login_manager = LoginManager()
 
 bcrypt = Bcrypt()
 
+scheduler = APScheduler()
+
 from .models import User
 
 
 @login_manager.user_loader
-def load_user(email):
-    return User.query.filter(User.email == email).first()
+def load_user(id):
+    return User.query.filter(User.id == id).first()

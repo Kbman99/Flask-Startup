@@ -1,0 +1,245 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <h1 class="ui header centered">
+        Device Manager
+    </h1>
+    <div class="ui vertically divided grid">
+        <div class="two column row">
+            <div class="column">
+                <div class="ui form-user-2 segment right floated">
+                    <form class="ui form" action="{{ url_for('api.add_device', device_type='gateway') }}" method="POST">
+                        <h4 class="ui dividing header">Add new gateway</h4>
+                        <label>Gateway ID</label>
+                        {{ m.render_field(g_form.gateway_id) }}
+                        {{ g_form.csrf_token }}
+                        <button class="ui green button button" type="submit" value="submit">Add Device</button>
+                        <div class="ui error message"></div>
+                    </form>
+                </div>
+            </div>
+            <div class="column">
+                <div class="ui form-user-3 segment left floated">
+                    <form class="ui form" action="{{ url_for('api.add_device', device_type='node') }}" method="POST">
+                        <h4 class="ui dividing header">Add new node</h4>
+                        <div class="two fields">
+                            <label>Node ID</label>
+                            {{ m.render_field(n_form.node_id) }}
+                            <label>Parent Gateway ID</label>
+                            {{ m.render_field(n_form.parent_gateway) }}
+                            {{ n_form.csrf_token }}
+                        </div>
+                        <div class="ui green submit button">Add Device</div>
+                        <div class="ui error message"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="ui hidden divider"></div>
+        <div class="one column row">
+            <div class="column">
+                <h1 class="ui header centered">
+                    My Devices
+                </h1>
+            </div>
+            <div class="column"></div>
+        </div>
+    </div>
+    <div id="container" align="center" style="width:60%;margin: 0 auto">
+        <table class="ui celled centered structured table">
+            <thead>
+            <tr>
+                <th rowspan="2">Gateway ID</th>
+                <th rowspan="2">Node ID</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for g in current_user.gateways %}
+                {% if g.child_nodes %}
+                    <tr>
+                        <td id="{{ g.gateway_id }}" class="left aligned"
+                            rowspan="{{ g.child_nodes|length }}"> {{ g.gateway_id }}
+                            <button class="edit-table gateway tiny circular negative ui icon button right floated">
+                                <i class="large remove icon"></i>
+                            </button>
+                        </td>
+                        {% for n in g.child_nodes %}
+                            <td id="{{ n.node_id }}" class="left aligned {{ g.gateway_id }}">{{ n.node_id }}
+                                <button class="edit-table node tiny circular negative ui icon button right floated">
+                                    <i class="large remove icon"></i>
+                                </button>
+                            </td>
+                            </tr>
+                            {% if loop.index != g.child_nodes|length %}
+                                <tr>
+                            {% endif %}
+                        {% endfor %}
+                {% else %}
+                    <tr>
+                        <td id="{{ g.gateway_id }}" class="left aligned" rowspan="1"> {{ g.gateway_id }}
+                            <button class="edit-table gateway tiny circular negative ui icon button right floated">
+                                <i class="large remove icon"></i>
+                            </button>
+                        </td>
+                        <td class="left aligned {{ g.gateway_id }}"> This gateway has no Nodes!
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function notifySuccess(message) {
+            new Noty({
+                text: message,
+                layout: 'topCenter',
+                theme: 'relax',
+                type: 'success',
+                timeout: 3000
+            }).show()
+        }
+
+
+        function notifyError(message, container_name) {
+            new Noty({
+                text: message,
+                //layout: 'topRight',
+                theme: 'relax',
+                type: 'error',
+                timeout: 3000,
+                container: container_name || false
+            });
+        }
+
+
+        function notifyInformation(message) {
+            new Noty({
+                text: message,
+                layout: 'topRight',
+                theme: 'relax',
+                type: 'information',
+                timeout: 3000
+            })
+        }
+
+
+        var gateways = [];
+            {% for g in current_user.gateways %}
+                gateways.push("{{ g.gateway_id }}");
+            {% endfor %}
+            console.log(gateways);
+
+
+        $.fn.form.settings.rules.gatewayExists = function(v) {
+            return ($.inArray(v.toString(), gateways) !== -1)
+        };
+
+
+        $.fn.form.settings.rules.gatewayDoesNotExist = function(v) {
+            return ($.inArray(v.toString(), gateways) === -1)
+        };
+
+
+        $(document).ready(function () {
+            $('.ui.form')
+                .form({
+                    fields: {
+                        node_id: {
+                            identifier: 'node_id',
+                            rules: [
+                                {
+                                    type: 'empty',
+                                    prompt: 'You must enter a Node ID'
+                                }
+                            ]
+                        },
+                        parent_gateway: {
+                            identifier: 'parent_gateway',
+                            rules: [
+                                {
+                                    type: 'empty',
+                                    prompt: 'You must enter a Parent Gateway ID.'
+                                },
+                                {
+                                    type: 'gatewayExists',
+                                    prompt: 'The entered gateway does not yet exist, please add the device first.'
+                                }
+                            ]
+                        },
+                        gateway_id: {
+                            identifier: 'gateway_id',
+                            rules: [
+                                {
+                                    type: 'empty',
+                                    prompt: 'Gateway ID cannot be empty.'
+                                },
+                                {
+                                    type: 'gatewayDoesNotExist',
+                                    prompt: 'The entered gateway already exists, you cannot add it twice.'
+                                }
+                            ]
+                        }
+                    }
+                });
+
+
+            function removeDevice(d_id, d_type) {
+                $.ajax({
+                    url: "{{ url_for('api.remove_device') }}",
+                    type: 'POST',
+                    dataType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        'device': d_type,
+                        'id': d_id
+                    }),
+                    success: function (response) {
+                        notifySuccess('Your ' + d_type + ' ' + d_id + ' has been successfully removed.');
+                        console.log(response);
+                    },
+                    error: function (jqXHR, textStatus, error) {
+                        notifyError('Error in removing ' + d_type + ' ' + d_id);
+                        console.log(error);
+                    }
+                });
+            }
+
+
+            $('.edit-table').click(function () {
+                if (jQuery.inArray('gateway', $(this).attr("class").split(' ')) !== -1) {
+                    var gateway_id = $(this).parent().attr('id');
+                    $("td").remove("." + gateway_id);
+                    $(this).parent().remove();
+                    console.log(gateway_id);
+                    removeDevice(gateway_id, 'gateway');
+                }
+                else {
+                    parent = $(this).parent();
+                    var node_id = parent.attr('id');
+                    var gateway_array = $(this).parent().attr("class").split(' ');
+                    remove1 = gateway_array.indexOf("left");
+                    remove2 = gateway_array.indexOf("aligned");
+                    gateway_array.splice(remove1, 1);
+                    gateway_array.splice(remove2 - 1, 1);
+                    gateway = gateway_array[0];
+                    count = $("." + gateway).length;
+                    if (count === 1){
+                        $(this).fadeOut(2000, function(){ $(this).remove(); });
+                        parent.text("This gateway has no Nodes!")
+                    }
+                    else {
+                        $(this).fadeOut(2000, function() { parent.remove(); });
+                    }
+                    removeDevice(node_id, 'node');
+                }
+            });
+        });
+    </script>
+
+{% endblock %}

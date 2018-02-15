@@ -29,8 +29,6 @@ Jinja2==2.9.6
 jsonschema==2.6.0
 MarkupSafe==1.0
 ndg-httpsclient==0.4.3
-olefile==0.44
-Pillow==4.3.0
 psycopg2==2.7.3.2
 pusher==1.7.2
 pyasn1==0.3.7

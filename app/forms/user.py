@@ -1,5 +1,5 @@
 from flask_wtf import Form
-from wtforms import TextField, PasswordField
+from wtforms import TextField, PasswordField, SelectField
 from wtforms.validators import (Required, Length, Email, ValidationError,
                                 EqualTo)
 from app.models import User
@@ -82,3 +82,26 @@ class SignUp(Form):
         EqualTo('confirm', message='Passwords must match.')
     ], description='Password')
     confirm = PasswordField(description='Confirm password')
+
+
+class Gateway(Form):
+
+    gateway_id = TextField(validators=[Required()],
+                           description='TTN Gateway ID')
+
+
+class Node(Form):
+
+    node_id = TextField(validators=[Required()],
+                        description='TTN Node ID')
+    parent_gateway = TextField(validators=[Required()],
+                               description='Parent Gateway ID')
+
+
+class NodeDrop(Form):
+
+    node_id = TextField(validators=[Required()],
+                        description='TTN Node ID')
+
+    parent_gateway = SelectField(validators=[Required()],
+                                 description='TTN Node ID')

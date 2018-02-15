@@ -16,7 +16,7 @@ body {
 }
 
 #body {
-   margin: 20px;
+   /*//margin: 20px;*/
    min-height: 100%;
 }
 
@@ -35,6 +35,18 @@ body {
    margin-top: 10% !important;
 }
 
+.form-user-2 {
+   width: 40% !important;
+   margin: 0 auto !important;
+   margin-top: 5% !important;
+}
+
+.form-user-3 {
+   width: 60% !important;
+   margin: 0 auto !important;
+   margin-top: 5% !important;
+}
+
 .form-error {
    color: #E50000 !important;
 }
@@ -49,4 +61,8 @@ body {
 
 .error-box {
    margin-top: 8%;
+}
+
+td {
+    border-bottom: 1px #D0D0D0 !important;
 }
