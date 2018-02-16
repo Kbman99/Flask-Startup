@@ -34,12 +34,13 @@
 
 {% block content %}
     <div class="content">
-        <h1>{{ title }}</h1>
+        <div class="ui hidden divider"></div>
+        <h1 class="ui centered header">{{ title }}</h1>
 
         {% if current_user.is_authenticated %}
             <div id="map"></div>
             <div class="ui grid" style="outline: black">
-                <div class="five wide column right floated" style="outline: black">
+                <div class="five wide column right floated floated" style="outline: black; margin-right: 20px;">
                     <table class="ui celled table">
                         <thead>
                         <tr>
@@ -76,7 +77,7 @@
                     {% endfor %}
                 {% endfor %}
 
-                var mymap = L.map('map', {center: [35.0545, -85.28], zoom: 3}),
+                var mymap = L.map('map', {center: [35.0545, -95.28], zoom: 4}),
                     realtime = L.realtime({
                         url: "{{ url_for('api.get_data', id=current_user.id) }}",
                         crossOrigin: true,
