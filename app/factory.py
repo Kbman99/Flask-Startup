@@ -3,6 +3,7 @@ from flask import Flask
 from .core import db, login_manager, debug_toolbar, bcrypt, scheduler
 from .helpers import register_blueprints
 from app import config
+from app import filters
 
 
 def create_app(package_name, package_path, settings=None):
@@ -27,5 +28,7 @@ def create_app(package_name, package_path, settings=None):
     debug_toolbar.init_app(app)
 
     register_blueprints(app, package_name, package_path)
+
+    app.jinja_env.filters['time_str'] = filters.gen_time_str
 
     return app

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, abort, flash, current_app
+from flask import Blueprint, render_template, redirect, url_for, abort, flash, current_app, request
 from flask_login import login_user, logout_user, login_required
 
 from app.core import db
@@ -6,6 +6,10 @@ from app import models
 from app.forms import user as user_forms
 from app.toolbox import email
 from flask import current_app
+
+
+import time
+import sys
 
 import app
 
@@ -158,3 +162,14 @@ def device_manager():
     n_form = user_forms.Node()
     return render_template('user/devices.html', g_form=g_form, n_form=n_form)
     #return render_template('user/devices.html', n_form=n_form)
+
+
+@user.route('/deviceInfo', methods=['GET', 'POST'])
+@login_required
+def device_info():
+    if request.method == 'GET':
+        return render_template('user/device_info.html', title='Device Information')
+    elif request.method == 'POST':
+        node_id = request.values.get('node')
+        node = models.Node.query.filter(models.Node.node_id == node_id).first()
+        return render_template('user/device_info.html', data=node.node_info[::-1], node_id=node_id)

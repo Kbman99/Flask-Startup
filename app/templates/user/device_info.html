@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <h1 class="ui centered header">{{ title }}</h1>
+    <div class="ui hidden divider"></div>
+    <div class="ui grid" xmlns="http://www.w3.org/1999/html">
+        <div class="three column centered row">
+            <div class="centered column">
+                <form class="ui form" action="/user/deviceInfo" method="POST">
+                    <h4 class="ui dividing header">Get Node Information</h4>
+                    <div class="eight wide centered field">
+                        <select class="ui fluid dropdown" id="node" name="node">
+                                <option value="">Node ID</option>
+                                    {% for g in current_user.gateways %}
+                                        {% for n in g.child_nodes %}
+                                            <option value="{{ n.node_id }}">{{ n.node_id }}</option>
+                                        {% endfor %}
+                                    {% endfor %}
+                            </select>
+                        </div>
+                    <button class="ui primary button" type="submit">Confirm</button>
+                </form>
+            </div>
+        </div>
+
+        {% if data %}
+            <div class="ui dividing header"></div>
+            <div class="eight column centered row">
+                <div class="eight wide column">
+                    <table class="ui celled striped table">
+                        <thead>
+                            <tr>
+                                <th class="two wide">ID</th>
+                                <th class="two wide">Lat</th>
+                                <th class="two wide">Long</th>
+                                <th class="three wide">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in data[:-1] %}
+                                <tr>
+                                    <th>{{ node_id }}</th>
+                                    <th class="right aligned"> {{ d.lat }}</th>
+                                    <th class="right aligned"> {{ d.long }}</th>
+                                    <th class="center aligned"> {{ d.timestamp|time_str }}</th>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+{#            {% for d in data %}#}
+{#                <p>{{ [node_id, d.lat, d.long] }}</p>#}
+{#                <br>#}
+{#            {% endfor %}#}
+        {% endif %}
+	</div>
+    <script>
+        $('.ui.dropdown').dropdown();
+    </script>
+
+{% endblock %}

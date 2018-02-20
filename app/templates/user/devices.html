@@ -2,6 +2,8 @@
 
 {% block head %}
     {{ super() }}
+    <style>
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -39,7 +41,6 @@
                 </div>
             </div>
         </div>
-        <div class="ui hidden divider"></div>
         <div class="one column row">
             <div class="column">
                 <h1 class="ui header centered">
@@ -214,9 +215,11 @@
             $('.edit-table').click(function () {
                 if (jQuery.inArray('gateway', $(this).attr("class").split(' ')) !== -1) {
                     var gateway_id = $(this).parent().attr('id');
-                    $("td").remove("." + gateway_id);
-                    $(this).parent().remove();
-                    console.log(gateway_id);
+                    var children = $('.'+gateway_id);
+                    $(this).parent().add(children).fadeOut(2000, function(){
+                        $(this).parent().remove();
+                        children.remove();
+                    });
                     removeDevice(gateway_id, 'gateway');
                 }
                 else {
@@ -230,11 +233,15 @@
                     gateway = gateway_array[0];
                     count = $("." + gateway).length;
                     if (count === 1){
-                        $(this).fadeOut(2000, function(){ $(this).remove(); });
-                        parent.text("This gateway has no Nodes!")
+                        parent.fadeOut(2000, function(){
+                            parent.text("This gateway has no Nodes!")
+                            parent.show();
+                        });
                     }
                     else {
-                        $(this).fadeOut(2000, function() { parent.remove(); });
+                        parent.fadeOut(2000, function() {
+                            parent.remove();
+                        });
                     }
                     removeDevice(node_id, 'node');
                 }

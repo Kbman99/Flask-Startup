@@ -65,7 +65,7 @@ class NodeInfo(db.Model):
     __tablename__ = 'location'
 
     id = db.Column(db.Integer, primary_key=True)
-    #timestamp = db.Column(db.Integer)
+    timestamp = db.Column(db.Integer)
     lat = db.Column(db.Float)
     long = db.Column(db.Float)
 

@@ -30,12 +30,13 @@
         <!-- Navbar -->
         <div class="ui attached inverted menu">
         {{ m.nav_link('home.index', 'Home') }}
-        {{ m.nav_link('home.map', 'Map') }}
         {{ m.nav_link('home.faq', 'FAQ') }}
         {{ m.nav_link('home.contact', 'Contact') }}
         <!-- User is logged in -->
         {% if current_user.is_authenticated %}
+            {{ m.nav_link('home.map', 'Device Map') }}
             {{ m.nav_link('user.device_manager', 'Device Manager') }}
+            {{ m.nav_link('user.device_info', 'Device Info') }}
             <div class="right menu">
             <div class="item">
                 <a class="ui primary button" href="/user/account">{{ current_user.full_name }}</a>
