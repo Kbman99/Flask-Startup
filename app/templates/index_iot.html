@@ -6,11 +6,15 @@
         #body {
             margin: 0;
         }
+
+        #head {
+            border-radius: 0;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
-    <div class="ui inverted verticle masthead center aligned segment" style="padding-top: 10%;min-height: 500px">
+    <div id="head" class="ui inverted verticle masthead center aligned segment" style="padding-top: 10%;min-height: 500px">
         <div class="ui text container">
             <h1 class="ui inverted header">
                 LoRa Beacon Base

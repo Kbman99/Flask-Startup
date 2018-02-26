@@ -14,14 +14,14 @@
                     <h4 class="ui dividing header">Get Node Information</h4>
                     <div class="eight wide centered field">
                         <select class="ui fluid dropdown" id="node" name="node">
-                                <option value="">Node ID</option>
-                                    {% for g in current_user.gateways %}
-                                        {% for n in g.child_nodes %}
-                                            <option value="{{ n.node_id }}">{{ n.node_id }}</option>
-                                        {% endfor %}
-                                    {% endfor %}
-                            </select>
-                        </div>
+                            <option value="">Node ID</option>
+                            {% for g in current_user.gateways %}
+                                {% for n in g.child_nodes %}
+                                    <option value="{{ n.node_id }}">{{ n.node_id }}</option>
+                                {% endfor %}
+                            {% endfor %}
+                        </select>
+                    </div>
                     <button class="ui primary button" type="submit">Confirm</button>
                 </form>
             </div>
@@ -31,37 +31,42 @@
             <div class="ui dividing header"></div>
             <div class="eight column centered row">
                 <div class="eight wide column">
-                    <table class="ui celled striped table">
+                    <table class="ui sortable celled striped table">
                         <thead>
-                            <tr>
-                                <th class="two wide">ID</th>
-                                <th class="two wide">Lat</th>
-                                <th class="two wide">Long</th>
-                                <th class="three wide">Time</th>
-                            </tr>
+                        <tr>
+                            <th class="two wide">ID</th>
+                            <th class="two wide">Lat</th>
+                            <th class="two wide">Long</th>
+                            <th class="three wide">Time</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {% for d in data[:-1] %}
-                                <tr>
-                                    <th>{{ node_id }}</th>
-                                    <th class="right aligned"> {{ d.lat }}</th>
-                                    <th class="right aligned"> {{ d.long }}</th>
-                                    <th class="center aligned"> {{ d.timestamp|time_str }}</th>
-                                </tr>
-                            {% endfor %}
+                        {% for d in data[:-1] %}
+                            <tr>
+                                <th>{{ node_id }}</th>
+                                <th class="right aligned"> {{ d.lat }}</th>
+                                <th class="right aligned"> {{ d.long }}</th>
+                                <th class="center aligned"> {{ d.timestamp|time_str }}</th>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
 
             </div>
-{#            {% for d in data %}#}
-{#                <p>{{ [node_id, d.lat, d.long] }}</p>#}
-{#                <br>#}
-{#            {% endfor %}#}
+            {#            {% for d in data %}#}
+            {#                <p>{{ [node_id, d.lat, d.long] }}</p>#}
+            {#                <br>#}
+            {#            {% endfor %}#}
         {% endif %}
-	</div>
+    </div>
+    <script src="https://semantic-ui.com/javascript/library/tablesort.js"></script>
     <script>
-        $('.ui.dropdown').dropdown();
+
+        $().ready(function () {
+            $('.ui.dropdown').dropdown();
+            $('table').tablesort();
+        });
     </script>
 
 {% endblock %}

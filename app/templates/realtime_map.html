@@ -23,9 +23,14 @@
     <style>
         #map {
             height: calc(100% - 140px);
-            width: 65%;
+            width: calc(100% - 60px);
             position: absolute !important;
             margin: 10px;
+            z-index: 1;
+        }
+
+        #mobile-spacer {
+            height: 75vh;
         }
 
 
@@ -39,8 +44,10 @@
         {% if current_user.is_authenticated %}
             <div id="map"></div>
             <div class="ui grid" style="outline: black">
-                <div class="five wide column right floated floated" style="outline: black; margin-right: 20px;">
-                    <table class="ui celled table">
+                <div id="mobile-spacer" class="one wide computer sixteen wide mobile column"></div>
+                <div class="four wide computer fourteen wide column right floated computer center aligned mobile" style="outline: black; margin-right: 20px;">
+                <div class="ui hidden divider"></div>
+                    <table class="ui unstackable celled table" style="position: relative;z-index: 1000;opacity: 0.7">
                         <thead>
                         <tr>
                             <th>Node ID</th>
@@ -52,7 +59,7 @@
                         {% for g in current_user.gateways %}
                             {% for n in g.child_nodes %}
                                 <tr>
-                                    <td id="{{ n.node_id }}">{{ n.node_id }}</td>
+                                    <td id="{{ n.node_id }}"><a href="#"> {{ n.node_id }}</a></td>
                                     <td id="{{ n.node_id + "-coords" }}">awaiting update...</td>
                                     <td id="{{ n.node_id + "-status" }}">awaiting status...</td>
                                 </tr>
@@ -88,10 +95,13 @@
                         },
                         onEachFeature: function (f, l) {
                             l.bindPopup(function () {
+                                //console.log(f);
                                 return '<h3>' + f.properties.node_id + '</h3>' +
                                     '<div class="ui divider"></div>' +
                                     '<p> <b> Current Location: </b>' + node_dict[f.properties.node_id]
-                                        .coords[node_dict[f.properties.node_id].coords.length - 1] + '</p>'
+                                        .coords[node_dict[f.properties.node_id].coords.length - 1] + '</p>' +
+                                    '<p> <b> Last Update: </b>' + node_dict[f.properties.node_id]
+                                        .lastUpdate[node_dict[f.properties.node_id].lastUpdate.length - 1] + '</p>'
                             });
                         }
                     }).addTo(mymap);
@@ -99,7 +109,7 @@
                 for (var n in nodes) {
                     node_dict[nodes[n]] = {
                         "polyline": L.polyline([], {color: "#" + ((1 << 24) * Math.random() | 0).toString(16)}),
-                        "lastUpdate": 0,
+                        "lastUpdate": [],
                         "coords": []
                     };
                     node_dict[nodes[n]].polyline.addTo(mymap)
@@ -123,12 +133,14 @@
                 realtime.on('update', function (f) {
                     // Coords are reversed normal: [lat, long] -> geojson: [long, lat]
                     var features = f.features;
+                    console.log(features);
                     for (var i in features) {
                         coords = features[i].geometry.coordinates;
                         coords_reversed = coords.reverse();
                         node_dict[i].polyline.addLatLng(coords_reversed);
                         node_dict[i].polyline.redraw();
                         node_dict[i].coords.push(coords_reversed);
+                        node_dict[i].lastUpdate.push(features[i].properties.timestamp);
                         updateTable(i, coords_reversed, "ok")
                     }
                 });
@@ -149,7 +161,7 @@
                 // {x} and {y} are the x/y of where you are on the map
                 // {z} is the zoom level
                 // {s} is the subdomain of cartodb
-                var layer = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+                var layer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
                     maxZoom: 18,
                     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; ' +
                     '<a href="http://cartodb.com/attributions">CartoDB</a>'
@@ -160,40 +172,6 @@
                 mymap.addLayer(layer);
 
                 mymap.invalidateSize();
-
-                //var polyline = L.polyline([], {color: 'red'}).addTo(mymap);
-
-                {##}
-                {#        var markers = L.markerClusterGroup({#}
-                {#            chunkLoading: true#}
-                {#        });#}
-                {##}
-                {#        markers.on('click', function (a) {#}
-                {#            console.log('marker ' + a.layer);#}
-                {#        });#}
-                {##}
-                {#        markers.on('clusterclick', function (a) {#}
-                {#            // a.layer is actually a cluster#}
-                {#            console.log('cluster ' + a.layer.getAllChildMarkers().length);#}
-                {#        });#}
-                {##}
-                {#        var markerList = [];#}
-                {#        var latlngs = [];#}
-                {##}
-                {#        {%  for i in range(100) %}#}
-                {#            var title = "<strong><h3>Title!<h3></strong>" +#}
-                {#                        "<ul>" +#}
-                {#                        "<li> Details!</li>" +#}
-                {#                        "</ul>";#}
-                {#                var marker = L.marker([{{ i }}, {{ i }}]);#}
-                {#            marker.bindPopup(title);#}
-                {#            markerList.push(marker);#}
-                {#            latlngs.push([{{ i }}, {{ i }}]);#}
-                {#        {% endfor %}#}
-                {#        var polyline = L.polyline(latlngs, {color: 'red'}).addTo(mymap);#}
-                {##}
-                {#        markers.addLayers(markerList);#}
-                {#        mymap.addLayer(markers);#}
 
             </script>
         {% endif %}

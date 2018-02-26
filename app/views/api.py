@@ -1,12 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, abort, flash, jsonify, abort, request
-import json
+from flask import Blueprint, render_template, redirect, url_for, flash, jsonify, request
 import sys
+import time
 
 from app.models import User, Gateway, Node, NodeInfo
 from app.core import db
 from app.forms import user as user_forms
-from app.schemas import data
-from app.toolbox import validate
 
 from flask_login import current_user
 
@@ -29,7 +27,6 @@ def add_device(device_type):
     elif device_type == 'node':
         n_form = user_forms.Node()
         if n_form.validate_on_submit():
-            u = User.query.filter(User.id == current_user.id).first()
             g = Gateway.query.filter(Gateway.user == current_user.id)\
                 .filter(Gateway.gateway_id == n_form.parent_gateway.data).first()
             if g:
@@ -89,7 +86,8 @@ def retrieve_data(id):
                 data[node.node_id] = {
                     'id': node.node_id,
                     'lat': node_info.lat,
-                    'long': node_info.long
+                    'long': node_info.long,
+                    'time': node_info.timestamp
                 }
         return data
     except Exception as e:
@@ -107,7 +105,8 @@ def generate_geojson(data):
             "type": "Feature",
             "properties": {
                 "node_id": k,
-                "Status": ""
+                "status": "",
+                "timestamp": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(v["time"]))
             },
             "geometry": {
                 "type": "Point",
@@ -117,4 +116,5 @@ def generate_geojson(data):
                 ]
             }
         })
+        #print(geo_json_schema["features"][0]["properties"]["timestamp"], sys.stderr)
     return geo_json_schema
