@@ -1,12 +1,28 @@
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
+from itsdangerous import Serializer
+
 from flask_login import UserMixin
+from flask import current_app
 
 from .core import db, bcrypt
 
+import datetime
+import uuid
+import sys
+
 
 class User(db.Model, UserMixin):
+
+    def __init__(self, first_name, last_name, email, password, confirmation=0):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        self.confirmation = confirmation
+        self.password_hash = bcrypt.generate_password_hash(password)
+        self.registered_on = datetime.datetime.now()
+        self.set_token()
 
     __tablename__ = 'user'
 
@@ -15,27 +31,53 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String)
     email = db.Column(db.String, unique=True)
     confirmation = db.Column(db.Integer)
-    _password = db.Column(db.String)
+    password_hash = db.Column(db.String)
+    registered_on = db.Column(db.DateTime, nullable=False)
+    _token = db.Column(db.String)
 
-    gateways = relationship('Gateway', backref='users', cascade='all, delete-orphan')
+    # def __init__(self, first_name, last_name, email, password, confirmation=0):
+    #     self.first_name = first_name
+    #     self.last_name = last_name
+    #     self.email = email
+    #     self.confirmation = confirmation
+    #     self._password = password
+    #     self.registered_on = datetime.datetime.now()
+    #     self.set_token()
+
+    gateways = relationship('Gateway', backref='user', cascade='all, delete-orphan')
+
+    def set_token(self):
+        self._token = str(uuid.uuid4())
+        return self.token
+
+    @hybrid_property
+    def token(self):
+        return self._token
 
     @property
     def full_name(self):
         return '{} {}'.format(self.first_name, self.last_name)
 
-    @hybrid_property
-    def password(self):
-        return self._password
-
-    @password.setter
-    def _set_password(self, plaintext):
-        self._password = bcrypt.generate_password_hash(plaintext)
+    # @hybrid_property
+    # def password_hash(self):
+    #     return self.password_hash
+    #
+    # @password_hash.setter
+    # def password_hash(self, plaintext):
+    #     self.password_hash = bcrypt.generate_password_hash(plaintext)
 
     def check_password(self, plaintext):
-        return bcrypt.check_password_hash(self.password, plaintext)
+        return bcrypt.check_password_hash(self.password_hash, plaintext)
 
     def get_id(self):
         return self.id
+
+    def get_node(self, id):
+        nodes = [n for g in self.gateways for n in g.child_nodes]
+        for n in nodes:
+            print(n.node_id, sys.stderr)
+            if n.node_id == id:
+                return n
 
 
 class Gateway(db.Model):
@@ -45,7 +87,7 @@ class Gateway(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     gateway_id = db.Column(db.String)
 
-    user = db.Column(db.Integer, db.ForeignKey('user.id'))
+    owner = db.Column(db.Integer, db.ForeignKey('user.id'))
     child_nodes = relationship('Node', backref='gateway', cascade='all, delete-orphan')
 
 
@@ -68,6 +110,7 @@ class NodeInfo(db.Model):
     timestamp = db.Column(db.Integer)
     lat = db.Column(db.Float)
     long = db.Column(db.Float)
+    status = db.Column(db.Integer)
 
     parent_node = db.Column(db.Integer, db.ForeignKey('node.id'))
 

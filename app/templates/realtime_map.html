@@ -82,6 +82,22 @@
                         nodes.push("{{ n.node_id }}");
                     {% endfor %}
                 {% endfor %}
+                var green = L.icon({
+                   iconUrl: 'http://leafletjs.com/examples/custom-icons/leaf-green.png',
+                   iconSize: [30, 30]
+                });
+
+                var red = L.icon({
+                   iconUrl: 'http://leafletjs.com/examples/custom-icons/leaf-red.png',
+                   iconSize: [30, 30]
+                });
+
+                var orange = L.icon({
+                    iconUrl: 'http://leafletjs.com/examples/custom-icons/leaf-orange.png',
+                    iconSize: [30, 30]
+                });
+
+{#                var base = L.layerGroup();#}
 
                 var mymap = L.map('map', {center: [35.0545, -95.28], zoom: 4}),
                     realtime = L.realtime({
@@ -90,6 +106,35 @@
                         type: 'json'
                     }, {
                         interval: 5 * 1000,
+                        pointToLayer: function (feature, latlng) {
+                            var rand = Math.floor((Math.random() * 100) + 1);
+                            console.log(rand);
+                            if (rand >= 50) {
+                                marker = L.marker(latlng, {icon: green});
+                            }
+                            else {
+                                marker = L.marker(latlng, {icon: green});
+                            }
+
+                            return marker;
+                        },
+                        updateFeature: function(f, oldLayer) {
+                            if (!oldLayer){ return; }
+                            console.log(f.properties.status);
+
+                            var c = f.geometry.coordinates;
+                            oldLayer.setLatLng([c[1], c[0]]);
+
+                            if (Number(f.properties.status) === 1 || Number(f.properties.status) === 2) {
+                                console.log("SET RED");
+                                oldLayer.setIcon(red);
+                            }
+                            if (Number(f.properties.status) === 3) {
+                                console.log("SET GREEN");
+                                oldLayer.setIcon(green);
+                            }
+                            return oldLayer;
+                        },
                         getFeatureId: function (f) {
                             return f.properties.node_id;
                         },
@@ -110,7 +155,9 @@
                     node_dict[nodes[n]] = {
                         "polyline": L.polyline([], {color: "#" + ((1 << 24) * Math.random() | 0).toString(16)}),
                         "lastUpdate": [],
-                        "coords": []
+                        "coords": [],
+                        "status": 0,
+                        "lastStatusUpdateTime": 0
                     };
                     node_dict[nodes[n]].polyline.addTo(mymap)
                 }
@@ -119,29 +166,51 @@
                     status_selector = $("#" + id + "-status");
                     coords_selector = $("#" + id + "-coords");
                     document.getElementById(id + "-coords").innerHTML = coords[0] + ", " + coords[1];
-                    if (status == "ok") {
+                    if (status == "Ok") {
                         //document.getElementById(id+"-status").innerHTML = status
                         status_selector.removeClass();
                         status_selector.addClass("positive");
                     }
                     else {
+                        status_selector.removeClass();
+                        status_selector.addClass("negative");
                     }
                     status_selector.html(status);
                 }
 
 
                 realtime.on('update', function (f) {
-                    // Coords are reversed normal: [lat, long] -> geojson: [long, lat]
+                    // Coords are reversed
+                    // normal: [lat, long] -> geojson: [long, lat]
                     var features = f.features;
-                    console.log(features);
+
                     for (var i in features) {
                         coords = features[i].geometry.coordinates;
                         coords_reversed = coords.reverse();
+                        var status = 'Ok';
+
+                        switch(features[i].properties.status) {
+                            case 0:
+                                // Automatically set to 0 and 0 is always received on automatic
+                                // updates from LoPy. We only care about receiving other values
+                                break;
+                            case 1:
+                                node_dict[i].status = 1;
+                                status = 'Lost';
+                                break;
+                            case 2:
+                                node_dict[i].status = 2;
+                                status = 'Medical attention required';
+                                break;
+                            case 3:
+                                node_dict[i].status = 0;
+                                break;
+                        }
                         node_dict[i].polyline.addLatLng(coords_reversed);
                         node_dict[i].polyline.redraw();
                         node_dict[i].coords.push(coords_reversed);
                         node_dict[i].lastUpdate.push(features[i].properties.timestamp);
-                        updateTable(i, coords_reversed, "ok")
+                        updateTable(i, coords_reversed, status)
                     }
                 });
 

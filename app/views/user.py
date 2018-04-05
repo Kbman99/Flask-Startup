@@ -7,12 +7,6 @@ from app.forms import user as user_forms
 from app.toolbox import email
 from flask import current_app
 
-
-import time
-import sys
-
-import app
-
 from itsdangerous import URLSafeTimedSerializer
 
 # Create a user blueprint
@@ -71,7 +65,7 @@ def signin():
         if user is not None:
             if user.check_password(form.password.data):
                 login_user(user)
-                flash('Succesfully signed in.', 'positive')
+                flash('Successfully signed in.', 'positive')
                 return redirect(url_for('home.index'))
             else:
                 flash('The password you have entered is wrong.', 'negative')
@@ -173,3 +167,9 @@ def device_info():
         node_id = request.values.get('node')
         node = models.Node.query.filter(models.Node.node_id == node_id).first()
         return render_template('user/device_info.html', data=node.node_info[::-1], node_id=node_id)
+
+
+@user.route('/deviceAPI', methods=['GET', 'POST'])
+@login_required
+def device_api():
+    return render_template('user/device_API.html', title='Device API')

@@ -4,7 +4,7 @@ from termcolor import colored
 # from app import app, db
 import click
 
-from app.core import db
+from app.core import db, bcrypt
 from app import create_app
 from app.models import User, Gateway, Node, NodeInfo
 
@@ -42,7 +42,7 @@ def refreshdb():
 @app.cli.command()
 def testdb():
     u = User(first_name='k', last_name='b', email='test@gmail.com',
-             confirmation=1, password='pass')
+             confirmation=1, password='password')
     db.session.add(u)
     db.session.commit()
 
@@ -91,6 +91,12 @@ def testdb():
 def testq():
     ni = NodeInfo.query.join(Node).filter(Node.node_id == 'n3').order_by(NodeInfo.id.desc()).first()
     print(ni.parent_node, ni.lat, ni.long, sys.stderr)
+
+
+@app.cli.command()
+def bc():
+    pw_hash = bcrypt.generate_password_hash('secret', 10)
+    print(bcrypt.check_password_hash(pw_hash, 'secret'))
 
 
 if __name__ == '__main__':

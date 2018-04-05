@@ -8,7 +8,7 @@ from app.forms import user as user_forms
 
 from flask_login import current_user
 
-api = Blueprint('api', __name__, '/api')
+api = Blueprint('api', __name__, url_prefix='/api')
 
 
 @api.route('/add/device/<device_type>', methods=['POST'])
@@ -27,7 +27,8 @@ def add_device(device_type):
     elif device_type == 'node':
         n_form = user_forms.Node()
         if n_form.validate_on_submit():
-            g = Gateway.query.filter(Gateway.user == current_user.id)\
+            print(current_user.id, sys.stderr)
+            g = Gateway.query.filter(Gateway.owner == current_user.id)\
                 .filter(Gateway.gateway_id == n_form.parent_gateway.data).first()
             if g:
                 n = Node(
@@ -44,7 +45,7 @@ def add_device(device_type):
     return redirect(url_for('user.device_manager'))
 
 
-@api.route('/api/remove_device', methods=['POST'])
+@api.route('/remove_device', methods=['POST'])
 def remove_device():
     posted = request.get_json(force=True)
     if posted['device'] == 'gateway':
@@ -60,7 +61,7 @@ def remove_device():
     return jsonify(dict(msg='data saved!'))
 
 
-@api.route('/api/add_data', methods=['POST'])
+@api.route('/add_data', methods=['POST'])
 # @validate.validate_schema(data.new_data)
 def add_data():
     posted = request.get_json()
@@ -68,7 +69,7 @@ def add_data():
     return jsonify(dict(msg='data saved!'))
 
 
-@api.route('/api/get_data/<id>', methods=['GET'])
+@api.route('/get_data/<id>', methods=['GET'])
 def get_data(id):
     items = retrieve_data(id)
     geo_items = generate_geojson(items)
@@ -87,7 +88,8 @@ def retrieve_data(id):
                     'id': node.node_id,
                     'lat': node_info.lat,
                     'long': node_info.long,
-                    'time': node_info.timestamp
+                    'time': node_info.timestamp,
+                    'status': node_info.status
                 }
         return data
     except Exception as e:
@@ -105,7 +107,7 @@ def generate_geojson(data):
             "type": "Feature",
             "properties": {
                 "node_id": k,
-                "status": "",
+                "status": v["status"],
                 "timestamp": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(v["time"]))
             },
             "geometry": {
@@ -118,3 +120,27 @@ def generate_geojson(data):
         })
         #print(geo_json_schema["features"][0]["properties"]["timestamp"], sys.stderr)
     return geo_json_schema
+
+
+@api.route('/reset_token', methods=['POST'])
+def reset_token():
+    posted = request.get_json()
+    user = User.query.filter(User.id == posted['user_id']).first()
+    new_token = user.set_token()
+    db.session.commit()
+    return jsonify(dict(token=new_token))
+
+
+@api.route('/get_stuff', methods=['GET', 'POST'])
+def get_stuff():
+    auth_key = request.headers.get('Authorization')
+    user = User.query.filter(User.token == auth_key).first()
+    if user:
+        data = request.get_json()
+        node_id = data['dev_id']
+        node = user.get_node(node_id)
+        if node:
+            print("GOT IT!")
+    print(request.get_json(), sys.stderr)
+    print(request.headers.get('Authorization'), sys.stderr)
+    return jsonify(key=auth_key, data=request.get_json())

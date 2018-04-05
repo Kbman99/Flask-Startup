@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="ui centered grid">
+        <div class="row">
+            <h1 class="ui header">{{ title }}</h1>
+        </div>
+        <div class="ui divider"></div>
+        <div class="ui centered row">
+            <div class="ui fourteen wide mobile ten wide computer column">
+                <p style="font-size:20px">The following webhook token is provided to allow you to POST payload data via
+                    The Things Networks HTTP application integration. When configuring the integration, set the URL endpoint
+                    to <code>/api/data</code>, and enter your Webhook token in the <code>Authorization</code> field.
+                    This  will allow any data coming in as a POST be authorized to send info to the webhook and update
+                    your device information for your devices. This is implemented to both keep your data safe and ensure
+                    no tampering will occur.
+                </p>
+            </div>
+        </div>
+        <h2 class="ui header">Webhook Token</h2>
+        <div class="ui row">
+            <div class="five wide computer twelve wide mobile column">
+                <div class="ui fluid action input">
+                    <input id="token" value={{ current_user.token }} type="password">
+                    <button id="view" class="ui icon button">
+                        <i class="eye icon"></i>
+                    </button>
+                    <button id="copy" class="ui teal icon button">
+                        <i class="copy icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="ui row">
+            <div id="reset" class="ui red basic button">
+                Reset Token
+            </div>
+        </div>
+    </div>
+    <script>
+        function notifySuccess(message) {
+            new Noty({
+                text: message,
+                layout: 'topRight',
+                theme: 'relax',
+                type: 'success',
+                timeout: 3000
+            }).show()
+        }
+
+
+        function notifyError(message, container_name) {
+            new Noty({
+                text: message,
+                layout: 'topRight',
+                theme: 'relax',
+                type: 'error',
+                timeout: 3000,
+                container: container_name || false
+            });
+        }
+
+        $(document).ready(function () {
+
+            function resetToken(user_id) {
+                $.ajax({
+                    url: "{{ url_for('api.reset_token') }}",
+                    type: 'POST',
+                    dataType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        'user_id': user_id
+                    }),
+                    success: function (response) {
+                        notifySuccess('Token successfully reset!');
+                        $("#token").val(response.token);
+                    },
+                    error: function (jqXHR, textStatus, error) {
+                        notifyError('Error in resetting token!');
+                        console.log(error);
+                    }
+                });
+            }
+
+            $("#reset").click(function (){
+               var user_id = "{{ current_user.id }}";
+               console.log(user_id);
+               resetToken(user_id);
+            });
+
+            $("#copy").click(function () {
+                var v = $("#token").val();
+                var textField = document.createElement('textarea');
+                textField.innerText = v;
+                document.body.appendChild(textField);
+                textField.select();
+                document.execCommand('copy');
+                textField.remove();
+                $(this)
+                    .popup({
+                        title: 'Copied to clipboard!',
+                        on: 'click'
+                    })
+                    .popup('show')
+            });
+
+            $("#view").click(function () {
+                var token = $("#token");
+                var type = token.attr("type");
+                if (type === "password") {
+                    token.attr("type","text");
+                    token.html("<i class='eye icon'></i>")
+                } else {
+                    token.attr("type","password");
+                    token.html("<i class='eye slash icon'></i>")
+                }
+            });
+        });
+    </script>
+{% endblock %}

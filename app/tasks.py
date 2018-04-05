@@ -1,9 +1,8 @@
-import sys
 from app.models import User, NodeInfo
 from .core import scheduler, db
 from faker import Faker
-import random
 import time
+import random
 
 fake = Faker()
 
@@ -31,6 +30,22 @@ def generate_coords():
             ni.long = long
             ni.timestamp = int(time.time())
 
+            if 0 < random.randrange(0, 100) < 10:
+                ni.status = random.randrange(1, 4)
+            else:
+                ni.status = 0
+
             db.session.add(ni)
             node.node_info.append(ni)
             db.session.commit()
+
+#
+# nets = wlan.scan()
+# for net in nets:
+#     if net.ssid == 'Jeremiah':
+#         print('Network found!')
+#         wlan.connect(net.ssid, auth=(net.sec, '7546664988'), timeout=5000)
+#         while not wlan.isconnected():
+#             machine.idle() # save power while waiting
+#         print('WLAN connection succeeded!')
+#         break
