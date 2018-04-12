@@ -7,6 +7,7 @@ from app.core import db
 from app.forms import user as user_forms
 
 from flask_login import current_user
+import json
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
@@ -135,12 +136,26 @@ def reset_token():
 def get_stuff():
     auth_key = request.headers.get('Authorization')
     user = User.query.filter(User.token == auth_key).first()
+    print("Request received from {}".format(request.get_json()['dev_id']))
     if user:
         data = request.get_json()
+        print(json.dumps(data, indent=4, sort_keys=True), sys.stderr)
         node_id = data['dev_id']
         node = user.get_node(node_id)
         if node:
             print("GOT IT!")
-    print(request.get_json(), sys.stderr)
-    print(request.headers.get('Authorization'), sys.stderr)
+
     return jsonify(key=auth_key, data=request.get_json())
+
+
+@api.route('/get_history', methods=['GET'])
+def get_history():
+    user_id = request.args.get('user_id')
+    node_id = request.args.get('node_id')
+    user = User.query.filter(User.id == user_id).first()
+    node = user.get_node(node_id)
+    data = {n.timestamp: {'lat': n.lat,
+                          'long': n.long
+                          }
+            for n in node.node_info}
+    return json.dumps(data)

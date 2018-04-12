@@ -99,5 +99,12 @@ def bc():
     print(bcrypt.check_password_hash(pw_hash, 'secret'))
 
 
+@app.cli.command()
+def get_data():
+    user = User.query.filter(User.id == 1).first()
+    node = user.get_node('n1')
+    print(node.node_info)
+
+
 if __name__ == '__main__':
     app.cli()

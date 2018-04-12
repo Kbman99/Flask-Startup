@@ -22,7 +22,7 @@ class User(db.Model, UserMixin):
         self.confirmation = confirmation
         self.password_hash = bcrypt.generate_password_hash(password)
         self.registered_on = datetime.datetime.now()
-        self.set_token()
+        self.token = self.set_token()
 
     __tablename__ = 'user'
 
@@ -33,7 +33,7 @@ class User(db.Model, UserMixin):
     confirmation = db.Column(db.Integer)
     password_hash = db.Column(db.String)
     registered_on = db.Column(db.DateTime, nullable=False)
-    _token = db.Column(db.String)
+    token = db.Column(db.String)
 
     # def __init__(self, first_name, last_name, email, password, confirmation=0):
     #     self.first_name = first_name
@@ -47,12 +47,7 @@ class User(db.Model, UserMixin):
     gateways = relationship('Gateway', backref='user', cascade='all, delete-orphan')
 
     def set_token(self):
-        self._token = str(uuid.uuid4())
-        return self.token
-
-    @hybrid_property
-    def token(self):
-        return self._token
+        return str(uuid.uuid4())
 
     @property
     def full_name(self):
@@ -75,7 +70,6 @@ class User(db.Model, UserMixin):
     def get_node(self, id):
         nodes = [n for g in self.gateways for n in g.child_nodes]
         for n in nodes:
-            print(n.node_id, sys.stderr)
             if n.node_id == id:
                 return n
 
@@ -97,6 +91,7 @@ class Node(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     node_id = db.Column(db.String)
+    status = db.Column(db.Integer, default=0)
 
     parent_gateway = db.Column(db.Integer, db.ForeignKey('gateway.id'))
     node_info = relationship('NodeInfo', backref='node', cascade='all, delete-orphan')
@@ -113,6 +108,12 @@ class NodeInfo(db.Model):
     status = db.Column(db.Integer)
 
     parent_node = db.Column(db.Integer, db.ForeignKey('node.id'))
+
+    def add_info(self, lat, long, timestamp, status):
+        self.lat = lat
+        self.long = long
+        self.timestamp = timestamp
+        self.status = status
 
 # u = User('k', 'b', 'kylebowman99@gmail.com', True, 'lol')
 #

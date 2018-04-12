@@ -3,6 +3,7 @@ from .core import scheduler, db
 from faker import Faker
 import time
 import random
+import sys
 
 fake = Faker()
 
@@ -34,6 +35,13 @@ def generate_coords():
                 ni.status = random.randrange(1, 4)
             else:
                 ni.status = 0
+
+            if ni.status == 3:
+                node.status = 0
+            elif ni.status != 0:
+                node.status = ni.status
+
+            #print('node {} has status {}'.format(node.node_id, node.status), sys.stderr)
 
             db.session.add(ni)
             node.node_info.append(ni)

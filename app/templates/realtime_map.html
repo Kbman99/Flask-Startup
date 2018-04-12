@@ -53,6 +53,7 @@
                             <th>Node ID</th>
                             <th>Current Location</th>
                             <th>Status</th>
+                            <th>Show History</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -62,6 +63,7 @@
                                     <td id="{{ n.node_id }}"><a href="#"> {{ n.node_id }}</a></td>
                                     <td id="{{ n.node_id + "-coords" }}">awaiting update...</td>
                                     <td id="{{ n.node_id + "-status" }}">awaiting status...</td>
+                                    <td id="{{ n.node_id + "-history" }}"><a href="#"><i class="history icon"></i></a></td>
                                 </tr>
                             {% endfor %}
                         {% endfor %}
@@ -83,21 +85,42 @@
                     {% endfor %}
                 {% endfor %}
                 var green = L.icon({
-                   iconUrl: 'http://leafletjs.com/examples/custom-icons/leaf-green.png',
-                   iconSize: [30, 30]
+                   iconUrl: '../static/img/location-marker_5.png',
+                   iconSize: [37, 37]
                 });
 
                 var red = L.icon({
-                   iconUrl: 'http://leafletjs.com/examples/custom-icons/leaf-red.png',
-                   iconSize: [30, 30]
+                   iconUrl: '../static/img/first-aid-marker_3.png',
+                   iconSize: [37, 37]
                 });
 
                 var orange = L.icon({
-                    iconUrl: 'http://leafletjs.com/examples/custom-icons/leaf-orange.png',
-                    iconSize: [30, 30]
+                    iconUrl: '../static/img/lost-marker.png',
+                    iconSize: [37, 37]
                 });
 
 {#                var base = L.layerGroup();#}
+
+                for (var n in nodes) {
+                    node_dict[nodes[n]] = {
+                        "polyline": L.polyline([], {color: "#" + ((1 << 24) * Math.random() | 0).toString(16)}),
+                        "lastUpdate": [],
+                        "coords": [],
+                        "status": 0,
+                        "lastStatusUpdateTime": 0
+                    };
+                }
+                console.log(node_dict);
+
+                {% for g in current_user.gateways %}
+                    {% for n in g.child_nodes %}
+                        node_dict.{{ n.node_id }}.status = Number({{ n.status }});
+                    {% endfor %}
+                {% endfor %}
+
+                console.log(node_dict);
+                console.log("{{ url_for('api.get_history', user_id=1, node_id='n1') }}");
+
 
                 var mymap = L.map('map', {center: [35.0545, -95.28], zoom: 4}),
                     realtime = L.realtime({
@@ -107,15 +130,25 @@
                     }, {
                         interval: 5 * 1000,
                         pointToLayer: function (feature, latlng) {
-                            var rand = Math.floor((Math.random() * 100) + 1);
-                            console.log(rand);
-                            if (rand >= 50) {
-                                marker = L.marker(latlng, {icon: green});
-                            }
-                            else {
-                                marker = L.marker(latlng, {icon: green});
-                            }
+                            var id = feature.properties.node_id;
+                            console.log('Setting node ' + feature.properties.node_id);
+                            console.log(node_dict[id].status);
 
+                            if (Number(node_dict[id].status) === 0 || Number(feature.properties.status) === 3) {
+                                console.log("SET GREEN");
+                                console.log(node_dict[id].status);
+                                marker = L.marker(latlng, {icon: green});
+                            }
+                            else if (Number(node_dict[id].status) === 1){
+                                console.log("SET ORANGE");
+                                console.log(node_dict[id].status);
+                                marker = L.marker(latlng, {icon: orange});
+                            }
+                            else if (Number(node_dict[id].status) === 2) {
+                                console.log("SET RED");
+                                console.log(node_dict[id].status);
+                                marker = L.marker(latlng, {icon: red});
+                            }
                             return marker;
                         },
                         updateFeature: function(f, oldLayer) {
@@ -125,11 +158,15 @@
                             var c = f.geometry.coordinates;
                             oldLayer.setLatLng([c[1], c[0]]);
 
-                            if (Number(f.properties.status) === 1 || Number(f.properties.status) === 2) {
+                            if (Number(f.properties.status) === 1) {
+                                console.log("SET ORANGE");
+                                oldLayer.setIcon(orange);
+                            }
+                            else if (Number(f.properties.status) === 2) {
                                 console.log("SET RED");
                                 oldLayer.setIcon(red);
                             }
-                            if (Number(f.properties.status) === 3) {
+                            else if (Number(f.properties.status) === 3) {
                                 console.log("SET GREEN");
                                 oldLayer.setIcon(green);
                             }
@@ -151,15 +188,8 @@
                         }
                     }).addTo(mymap);
 
-                for (var n in nodes) {
-                    node_dict[nodes[n]] = {
-                        "polyline": L.polyline([], {color: "#" + ((1 << 24) * Math.random() | 0).toString(16)}),
-                        "lastUpdate": [],
-                        "coords": [],
-                        "status": 0,
-                        "lastStatusUpdateTime": 0
-                    };
-                    node_dict[nodes[n]].polyline.addTo(mymap)
+                for (var n_id in nodes) {
+                    node_dict[nodes[n_id]].polyline.addTo(mymap)
                 }
 
                 function updateTable(id, coords, status) {
@@ -193,6 +223,15 @@
                             case 0:
                                 // Automatically set to 0 and 0 is always received on automatic
                                 // updates from LoPy. We only care about receiving other values
+                                if (node_dict[i].status === 1) {
+                                    status = 'Lost';
+                                }
+                                else if (node_dict[i].status === 2) {
+                                    status = 'Medical attention required';
+                                }
+                                else {
+                                    status = 'Ok';
+                                }
                                 break;
                             case 1:
                                 node_dict[i].status = 1;
@@ -222,6 +261,24 @@
                             var long = Number(items[0]);
                             var lat = Number(items[1]);
                             mymap.setView([lat, long], 10);
+                        });
+                        $("#" + "{{ n.node_id }}" + "-history").click(function () {
+                            var user_id = Number({{ current_user.id }});
+                            var node_id = "{{ n.node_id }}";
+                            $.ajax({
+                                url: "{{ url_for('api.get_history') }}",
+                                data: {
+                                    'user_id': user_id,
+                                    'node_id': node_id
+                                },
+                                type: "GET",
+                                success: function (response) {
+                                    console.log(response);
+                                },
+                                error: function (error) {
+                                    console.log(error);
+                                }
+                            })
                         });
                     {% endfor %}
                 {% endfor %}
