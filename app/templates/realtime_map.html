@@ -90,6 +90,39 @@
             </div>
             </div>
             <script>
+                function notifySuccess(message) {
+                    new Noty({
+                        text: message,
+                        layout: 'topRight',
+                        theme: 'relax',
+                        type: 'success',
+                        timeout: 3000
+                    }).show()
+                }
+
+
+                function notifyError(message, container_name) {
+                    new Noty({
+                        text: message,
+                        layout: 'topRight',
+                        theme: 'relax',
+                        type: 'error',
+                        timeout: 3000,
+                        container: container_name || false
+                    });
+                }
+
+
+                function notifyInformation(message) {
+                    new Noty({
+                        text: message,
+                        layout: 'topRight',
+                        theme: 'relax',
+                        type: 'information',
+                        timeout: 3000
+                    })
+                }
+
                 // The first parameter are the coordinates of the center of the map
                 // The second parameter is the zoom level
                 {#        var mymap = L.map('map').setView([38.0000,-97.0000], 5);#}
@@ -103,17 +136,20 @@
                 {% endfor %}
                 var green = L.icon({
                    iconUrl: '../static/img/location-marker_5.png',
-                   iconSize: [37, 37]
+                   iconSize: [36, 36],
+                   iconAnchor: [18, 36]
                 });
 
                 var red = L.icon({
                    iconUrl: '../static/img/first-aid-marker_3.png',
-                   iconSize: [37, 37]
+                   iconSize: [36, 36],
+                   iconAnchor: [18, 36]
                 });
 
                 var orange = L.icon({
                     iconUrl: '../static/img/lost-marker.png',
-                    iconSize: [37, 37]
+                    iconSize: [36, 36],
+                   iconAnchor: [18, 36]
                 });
 
 {#                var base = L.layerGroup();#}
@@ -283,6 +319,7 @@
                             var user_id = Number({{ current_user.id }});
                             var node_id = "{{ n.node_id }}";
                             var time_length = $("#" + node_id + '-dropdown').dropdown('get value');
+                            var time_length_text = $("#" + node_id + '-dropdown').dropdown('get text');
                             $.ajax({
                                 url: "{{ url_for('api.get_history') }}",
                                 data: {
@@ -299,9 +336,11 @@
                                     }
                                     mymap.removeLayer(node_dict[node_id].polyline);
                                     node_dict[node_id].polyline = L.polyline(history, {color: "#" + ((1 << 24) * Math.random() | 0).toString(16)}).addTo(mymap);
+                                    notifySuccess("Now showing information from last " + time_length_text + " for Node " + node_id)
                                 },
                                 error: function (error) {
                                     console.log(error);
+                                    notifyError("Unable to load history for Node " + node_id);
                                 }
                             })
                         });
