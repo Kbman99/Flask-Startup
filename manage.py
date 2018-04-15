@@ -9,6 +9,7 @@ from app import create_app
 from app.models import User, Gateway, Node, NodeInfo
 
 import sys
+import time
 
 app = create_app()
 
@@ -104,6 +105,15 @@ def get_data():
     user = User.query.filter(User.id == 1).first()
     node = user.get_node('n1')
     print(node.node_info)
+
+
+@app.cli.command()
+def get_nodeinfo():
+    node = Node.query.filter(Node.node_id == 'n1').first()
+    node_info = NodeInfo.query\
+        .filter(NodeInfo.parent_node == node.id)\
+        .filter(NodeInfo.timestamp >= int(time.time() - 600)).all()
+    print(node_info)
 
 
 if __name__ == '__main__':

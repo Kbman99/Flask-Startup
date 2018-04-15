@@ -45,9 +45,9 @@
             <div id="map"></div>
             <div class="ui grid" style="outline: black">
                 <div id="mobile-spacer" class="one wide computer sixteen wide mobile column"></div>
-                <div class="four wide computer fourteen wide column right floated computer center aligned mobile" style="outline: black; margin-right: 20px;">
+                <div class="four wide computer fourteen wide column right floated computer center aligned mobile" style="outline: black; margin-right: 20px; padding-right:50px;">
                 <div class="ui hidden divider"></div>
-                    <table class="ui unstackable celled table" style="position: relative;z-index: 1000;opacity: 0.7">
+                    <table class="ui unstackable celled table" style="position: relative;z-index: 1000;opacity: 0.7;">
                         <thead>
                         <tr>
                             <th>Node ID</th>
@@ -63,7 +63,24 @@
                                     <td id="{{ n.node_id }}"><a href="#"> {{ n.node_id }}</a></td>
                                     <td id="{{ n.node_id + "-coords" }}">awaiting update...</td>
                                     <td id="{{ n.node_id + "-status" }}">awaiting status...</td>
-                                    <td id="{{ n.node_id + "-history" }}"><a href="#"><i class="history icon"></i></a></td>
+                                    <td id="{{ n.node_id + "-history" }}">
+                                        <div id="{{ n.node_id + "-dropdown"}}" class="ui compact selection dropdown">
+                                          <input type="hidden">
+                                              <i class="dropdown icon"></i>
+                                              <div class="default text">Time Period</div>
+                                              <div class="menu">
+                                                <div class="item" data-value="60">1 minute</div>
+                                                <div class="item" data-value="300">5 minutes</div>
+                                                <div class="item" data-value="600">10 minutes</div>
+                                                <div class="item" data-value="1800">30 minutes</div>
+                                                <div class="item" data-value="3600">1 hour</div>
+                                                <div class="item" data-value="7200">2 hours</div>
+                                                <div class="item" data-value="18000">5 hours</div>
+                                                <div class="item" data-value="86400">1 day</div>
+                                              </div>
+                                        </div>
+                                        <a id="{{ n.node_id + "-history-button"}}" href="#"><i class="history icon"></i></a>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         {% endfor %}
@@ -262,18 +279,26 @@
                             var lat = Number(items[1]);
                             mymap.setView([lat, long], 10);
                         });
-                        $("#" + "{{ n.node_id }}" + "-history").click(function () {
+                        $("#" + "{{ n.node_id }}" + "-history-button").click(function () {
                             var user_id = Number({{ current_user.id }});
                             var node_id = "{{ n.node_id }}";
+                            var time_length = $("#" + node_id + '-dropdown').dropdown('get value');
                             $.ajax({
                                 url: "{{ url_for('api.get_history') }}",
                                 data: {
                                     'user_id': user_id,
-                                    'node_id': node_id
+                                    'node_id': node_id,
+                                    'time_length': time_length
                                 },
                                 type: "GET",
                                 success: function (response) {
-                                    console.log(response);
+                                    var parsed = JSON.parse(response);
+                                    var history = [];
+                                    for(var i = 0; i < parsed.history.length; i++) {
+                                        history.push([parsed.history[i][0].lat, parsed.history[i][0].long])
+                                    }
+                                    mymap.removeLayer(node_dict[node_id].polyline);
+                                    node_dict[node_id].polyline = L.polyline(history, {color: "#" + ((1 << 24) * Math.random() | 0).toString(16)}).addTo(mymap);
                                 },
                                 error: function (error) {
                                     console.log(error);

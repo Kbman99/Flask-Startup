@@ -152,10 +152,16 @@ def get_stuff():
 def get_history():
     user_id = request.args.get('user_id')
     node_id = request.args.get('node_id')
+    time_length = request.args.get('time_length')
     user = User.query.filter(User.id == user_id).first()
     node = user.get_node(node_id)
-    data = {n.timestamp: {'lat': n.lat,
-                          'long': n.long
-                          }
-            for n in node.node_info}
+    node_info = NodeInfo.query\
+        .filter(NodeInfo.parent_node == node.id)\
+        .filter(NodeInfo.timestamp >= int(time.time()) - int(time_length)).all()
+    data = {'history': [[{
+                        'timestamp': n.timestamp,
+                        'lat': n.lat,
+                        'long': n.long
+                        }] for n in node_info]
+            }
     return json.dumps(data)

@@ -11,6 +11,7 @@ from .core import db, bcrypt
 import datetime
 import uuid
 import sys
+import time
 
 
 class User(db.Model, UserMixin):
@@ -67,7 +68,8 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return self.id
 
-    def get_node(self, id):
+    def get_node(self, id, time_length=600):
+        start_time = time.time() - time_length
         nodes = [n for g in self.gateways for n in g.child_nodes]
         for n in nodes:
             if n.node_id == id:
@@ -108,6 +110,12 @@ class NodeInfo(db.Model):
     status = db.Column(db.Integer)
 
     parent_node = db.Column(db.Integer, db.ForeignKey('node.id'))
+
+    def get_info(self):
+        node = Node.query.filter(Node.node_id == 'n1').first()
+        node_info = NodeInfo.query\
+            .filter(NodeInfo.parent_node == node.id)\
+            .filter(NodeInfo.timestamp >= int(time.time() - 600)).all()
 
     def add_info(self, lat, long, timestamp, status):
         self.lat = lat
