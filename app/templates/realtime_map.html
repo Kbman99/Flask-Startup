@@ -134,7 +134,7 @@
                         nodes.push("{{ n.node_id }}");
                     {% endfor %}
                 {% endfor %}
-                var green = L.icon({
+                var location = L.icon({
                    iconUrl: '../static/img/location-marker_5.png',
                    iconSize: [36, 36],
                    iconAnchor: [18, 36]
@@ -190,7 +190,7 @@
                             if (Number(node_dict[id].status) === 0 || Number(feature.properties.status) === 3) {
                                 console.log("SET GREEN");
                                 console.log(node_dict[id].status);
-                                marker = L.marker(latlng, {icon: green});
+                                marker = L.marker(latlng, {icon: location});
                             }
                             else if (Number(node_dict[id].status) === 1){
                                 console.log("SET ORANGE");
@@ -221,7 +221,7 @@
                             }
                             else if (Number(f.properties.status) === 3) {
                                 console.log("SET GREEN");
-                                oldLayer.setIcon(green);
+                                oldLayer.setIcon(location);
                             }
                             return oldLayer;
                         },

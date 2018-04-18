@@ -1,6 +1,6 @@
 from flask import Flask
 
-from .core import db, login_manager, debug_toolbar, bcrypt, scheduler
+from .core import db, login_manager, debug_toolbar, bcrypt, scheduler, mail
 from .helpers import register_blueprints
 from app import config
 from app import filters
@@ -19,6 +19,8 @@ def create_app(package_name, package_path, settings=None):
 
     login_manager.init_app(app)
     login_manager.login_view = 'user.signin'
+
+    mail.init_app(app)
 
     scheduler.init_app(app)
     scheduler.start()
