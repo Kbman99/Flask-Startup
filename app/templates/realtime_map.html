@@ -134,19 +134,19 @@
                         nodes.push("{{ n.node_id }}");
                     {% endfor %}
                 {% endfor %}
-                var location = L.icon({
+                var location_marker = L.icon({
                    iconUrl: '../static/img/location-marker_5.png',
                    iconSize: [36, 36],
                    iconAnchor: [18, 36]
                 });
 
-                var red = L.icon({
+                var firstAid_marker = L.icon({
                    iconUrl: '../static/img/first-aid-marker_3.png',
                    iconSize: [36, 36],
                    iconAnchor: [18, 36]
                 });
 
-                var orange = L.icon({
+                var lost_marker = L.icon({
                     iconUrl: '../static/img/lost-marker.png',
                     iconSize: [36, 36],
                    iconAnchor: [18, 36]
@@ -172,7 +172,7 @@
                 {% endfor %}
 
                 console.log(node_dict);
-                console.log("{{ url_for('api.get_history', user_id=1, node_id='n1') }}");
+{#                console.log("{{ url_for('api.get_history', user_id=1, node_id='n1') }}");#}
 
 
                 var mymap = L.map('map', {center: [35.0545, -95.28], zoom: 4}),
@@ -190,17 +190,17 @@
                             if (Number(node_dict[id].status) === 0 || Number(feature.properties.status) === 3) {
                                 console.log("SET GREEN");
                                 console.log(node_dict[id].status);
-                                marker = L.marker(latlng, {icon: location});
+                                marker = L.marker(latlng, {icon: location_marker});
                             }
                             else if (Number(node_dict[id].status) === 1){
                                 console.log("SET ORANGE");
                                 console.log(node_dict[id].status);
-                                marker = L.marker(latlng, {icon: orange});
+                                marker = L.marker(latlng, {icon: lost_marker});
                             }
                             else if (Number(node_dict[id].status) === 2) {
                                 console.log("SET RED");
                                 console.log(node_dict[id].status);
-                                marker = L.marker(latlng, {icon: red});
+                                marker = L.marker(latlng, {icon: firstAid_marker});
                             }
                             return marker;
                         },
@@ -213,15 +213,15 @@
 
                             if (Number(f.properties.status) === 1) {
                                 console.log("SET ORANGE");
-                                oldLayer.setIcon(orange);
+                                oldLayer.setIcon(lost_marker);
                             }
                             else if (Number(f.properties.status) === 2) {
                                 console.log("SET RED");
-                                oldLayer.setIcon(red);
+                                oldLayer.setIcon(firstAid_marker);
                             }
-                            else if (Number(f.properties.status) === 3) {
+                            else if (Number(f.properties.status) === 0) {
                                 console.log("SET GREEN");
-                                oldLayer.setIcon(location);
+                                oldLayer.setIcon(location_marker);
                             }
                             return oldLayer;
                         },
@@ -246,10 +246,11 @@
                 }
 
                 function updateTable(id, coords, status) {
+                    console.log("update table");
                     status_selector = $("#" + id + "-status");
                     coords_selector = $("#" + id + "-coords");
                     document.getElementById(id + "-coords").innerHTML = coords[0] + ", " + coords[1];
-                    if (status == "Ok") {
+                    if (status == "Okay") {
                         //document.getElementById(id+"-status").innerHTML = status
                         status_selector.removeClass();
                         status_selector.addClass("positive");
@@ -276,15 +277,18 @@
                             case 0:
                                 // Automatically set to 0 and 0 is always received on automatic
                                 // updates from LoPy. We only care about receiving other values
-                                if (node_dict[i].status === 1) {
-                                    status = 'Lost';
-                                }
-                                else if (node_dict[i].status === 2) {
-                                    status = 'Medical attention required';
-                                }
-                                else {
-                                    status = 'Ok';
-                                }
+{#                                if (node_dict[i].status === 1) {#}
+{#                                    status = 'Lost';#}
+{#                                }#}
+{#                                else if (node_dict[i].status === 2) {#}
+{#                                    status = 'Medical attention required';#}
+{#                                }#}
+{#                                else {#}
+{#                                    status = 'Ok';#}
+{#                                }#}
+{#                                break;#}
+                                node_dict[i].status = 0;
+                                status = 'Okay';
                                 break;
                             case 1:
                                 node_dict[i].status = 1;
@@ -362,7 +366,6 @@
                 mymap.addLayer(layer);
 
                 mymap.invalidateSize();
-
             </script>
         {% endif %}
 {% endblock %}

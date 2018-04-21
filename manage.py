@@ -56,24 +56,33 @@ def testdb():
 
     n1 = Node()
     n1.node_id = 'n1'
+    n1.status = 0
     n2 = Node()
     n2.node_id = 'n2'
+    n2.status = 0
     n3 = Node()
     n3.node_id = 'n3'
+    n3.status = 0
 
     db.session.add_all([n1, n2, n3])
 
     ni = NodeInfo()
     ni.lat = 123.1
     ni.long = 12.5
+    ni.status = 0
+    ni.timestamp = int(time.time())
 
     ni2 = NodeInfo()
     ni2.lat = 156
     ni2.long = 167
+    ni2.status = 0
+    ni2.timestamp = int(time.time())
 
     ni3 = NodeInfo()
     ni3.lat = 16
     ni3.long = 116
+    ni3.status = 0
+    ni3.timestamp = int(time.time())
 
     db.session.add_all([ni, ni2, ni3])
 
@@ -82,8 +91,9 @@ def testdb():
     g1.child_nodes.extend([n1, n2])
     g2.child_nodes.extend([n3])
 
-    n3.node_info.extend([ni])
-    n2.node_info.extend([ni2, ni3])
+    n3.node_info.extend([ni3])
+    n2.node_info.extend([ni2])
+    n1.node_info.extend([ni])
 
     db.session.commit()
 

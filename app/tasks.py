@@ -17,12 +17,15 @@ def generate_coords():
     with scheduler.app.app_context():
         u = grab_user()
         nodes = [n for g in u.gateways for n in g.child_nodes]
+        print(nodes)
 
         state_coords = [[32, -86], [39, -86], [37, -119], [42, -71.8], [38, -98], [39, -111], [39.3, -116.6]]
 
         for i, node in enumerate(nodes):
             # state = random.choice(state_coords)
             # state_coords.remove(state)
+            last_update = NodeInfo.query.filter(NodeInfo.parent_node == node.id) \
+                .order_by(NodeInfo.id.desc()).first()
             state = state_coords[i]
             ni = NodeInfo()
             lat = fake.geo_coordinate(state[0], 0.5)
@@ -33,15 +36,14 @@ def generate_coords():
 
             if 0 < random.randrange(0, 100) < 10:
                 ni.status = random.randrange(1, 4)
-            else:
-                ni.status = 0
-
-            if ni.status == 3:
-                node.status = 0
-            elif ni.status != 0:
                 node.status = ni.status
+                if ni.status == 3:
+                    node.status = 0
+                    ni.status = 0
+            else:
+                ni.status = last_update.status
 
-            #print('node {} has status {}'.format(node.node_id, node.status), sys.stderr)
+            print('node {} has status {}'.format(node.node_id, node.status), sys.stderr)
 
             db.session.add(ni)
             node.node_info.append(ni)
