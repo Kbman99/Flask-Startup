@@ -22,10 +22,17 @@ def generate_coords():
         state_coords = [[32, -86], [39, -86], [37, -119], [42, -71.8], [38, -98], [39, -111], [39.3, -116.6]]
 
         for i, node in enumerate(nodes):
+            if node.node_id == 'beacon_boi':
+                continue
             # state = random.choice(state_coords)
             # state_coords.remove(state)
             last_update = NodeInfo.query.filter(NodeInfo.parent_node == node.id) \
                 .order_by(NodeInfo.id.desc()).first()
+            if last_update:
+                last_status = last_update.status
+            else:
+                last_status = 0
+
             state = state_coords[i]
             ni = NodeInfo()
             lat = fake.geo_coordinate(state[0], 0.5)
@@ -41,7 +48,7 @@ def generate_coords():
                     node.status = 0
                     ni.status = 0
             else:
-                ni.status = last_update.status
+                ni.status = last_status
 
             print('node {} has status {}'.format(node.node_id, node.status), sys.stderr)
 

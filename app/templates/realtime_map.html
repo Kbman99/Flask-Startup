@@ -45,12 +45,12 @@
             <div id="map"></div>
             <div class="ui grid" style="outline: black">
                 <div id="mobile-spacer" class="one wide computer sixteen wide mobile column"></div>
-                <div class="four wide computer fourteen wide column right floated computer center aligned mobile" style="outline: black; margin-right: 20px; padding-right:50px;">
+                <div class="four wide computer sixteen wide column right floated computer right aligned mobile" style="outline: black; margin-right: 20px; padding-right:50px;">
                 <div class="ui hidden divider"></div>
-                    <table class="ui unstackable celled table" style="position: relative;z-index: 1000;opacity: 0.7;">
+                    <table class="ui unstackable celled very compact table left aligned mobile" style="position: relative;z-index: 1000;opacity: 0.7;">
                         <thead>
                         <tr>
-                            <th>Node ID</th>
+                            <th>ID</th>
                             <th>Current Location</th>
                             <th>Status</th>
                             <th>Show History</th>
@@ -109,7 +109,7 @@
                         type: 'error',
                         timeout: 3000,
                         container: container_name || false
-                    });
+                    }).show()
                 }
 
 
@@ -120,7 +120,7 @@
                         theme: 'relax',
                         type: 'information',
                         timeout: 3000
-                    })
+                    }).show()
                 }
 
                 // The first parameter are the coordinates of the center of the map
@@ -140,7 +140,7 @@
                    iconAnchor: [18, 36]
                 });
 
-                var firstAid_marker = L.icon({
+                var firstaid_marker = L.icon({
                    iconUrl: '../static/img/first-aid-marker_3.png',
                    iconSize: [36, 36],
                    iconAnchor: [18, 36]
@@ -200,7 +200,7 @@
                             else if (Number(node_dict[id].status) === 2) {
                                 console.log("SET RED");
                                 console.log(node_dict[id].status);
-                                marker = L.marker(latlng, {icon: firstAid_marker});
+                                marker = L.marker(latlng, {icon: firstaid_marker});
                             }
                             return marker;
                         },
@@ -217,7 +217,7 @@
                             }
                             else if (Number(f.properties.status) === 2) {
                                 console.log("SET RED");
-                                oldLayer.setIcon(firstAid_marker);
+                                oldLayer.setIcon(firstaid_marker);
                             }
                             else if (Number(f.properties.status) === 0) {
                                 console.log("SET GREEN");
@@ -271,8 +271,8 @@
                     for (var i in features) {
                         coords = features[i].geometry.coordinates;
                         coords_reversed = coords.reverse();
-                        var status = 'Ok';
-
+                        var status = 'Okay';
+                        console.log("Node " + String(i) + " status is " + String(node_dict[i].status));
                         switch(features[i].properties.status) {
                             case 0:
                                 // Automatically set to 0 and 0 is always received on automatic
@@ -287,14 +287,23 @@
 {#                                    status = 'Ok';#}
 {#                                }#}
 {#                                break;#}
+                                if (node_dict[i].status !== 0){
+                                    notifyInformation("Node " + String(i) + " status update to Okay");
+                                }
                                 node_dict[i].status = 0;
                                 status = 'Okay';
                                 break;
                             case 1:
+                                if (node_dict[i].status !== 1){
+                                    notifyInformation("Node " + String(i) + " status update to Lost");
+                                }
                                 node_dict[i].status = 1;
                                 status = 'Lost';
                                 break;
                             case 2:
+                                if (node_dict[i].status !== 2){
+                                    notifyInformation("Node " + String(i) + " status update to Medical attention required");
+                                }
                                 node_dict[i].status = 2;
                                 status = 'Medical attention required';
                                 break;

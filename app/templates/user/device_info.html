@@ -9,7 +9,7 @@
     <div class="ui hidden divider"></div>
     <div class="ui grid" xmlns="http://www.w3.org/1999/html">
         <div class="three column centered row">
-            <div class="centered column">
+            <div class="three wide computer twelve wide mobile centered column">
                 <form class="ui form" action="/user/deviceInfo" method="POST">
                     <h4 class="ui dividing header">Get Node Information</h4>
                     <div class="eight wide centered field">
@@ -29,12 +29,12 @@
 
         {% if data %}
             <div class="ui dividing header"></div>
-            <div class="eight column centered row">
-                <div class="eight wide column">
-                    <table class="ui sortable celled striped table">
+            <div class="three column centered row">
+                <div class="eight wide computer sixteen wide mobile column">
+                    <table class="ui sortable celled striped unstackable very compact table">
                         <thead>
                         <tr>
-                            <th class="two wide">ID</th>
+                            <th class="one wide">ID</th>
                             <th class="two wide">Status</th>
                             <th class="two wide">Lat</th>
                             <th class="two wide">Long</th>

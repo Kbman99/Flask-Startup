@@ -30,8 +30,13 @@
         <!-- Navbar -->
         <div class="ui attached inverted menu">
         {{ m.nav_link('home.index', 'Home') }}
-        {{ m.nav_link('home.faq', 'FAQ') }}
-        {{ m.nav_link('home.contact', 'Contact') }}
+        <div class="ui dropdown item">
+                About <i class="dropdown icon"></i>
+                <div class="menu">
+                    {{ m.nav_link('home.faq', 'FAQ') }}
+                    {{ m.nav_link('home.contact', 'Contact') }}
+                </div>
+        </div>
         <!-- User is logged in -->
         {% if current_user.is_authenticated %}
             <div class="ui dropdown item">
@@ -44,12 +49,22 @@
                 </div>
             </div>
             <div class="right menu">
-            <div class="item">
-                <a class="ui primary button" href="/user/account">{{ current_user.full_name }}</a>
+            <div class="ui primary dropdown item">
+                <i class="user icon"></i>
+                {{ current_user.full_name }} <i class="dropdown icon"></i>
+                <div class="menu">
+                    {{ m.nav_link('user.account', 'Account') }}
+                    {{ m.nav_link('user.signout', 'Signout') }}
+{#                    <a class="ui primary button" href="/user/account">{{ current_user.full_name }}</a>#}
+{#                    <a class="ui default button" href="/user/signout">Sign out</a>#}
+                </div>
             </div>
-            <div class="item">
-                <a class="ui default button" href="/user/signout">Sign out</a>
-            </div>
+{#            <div class="item">#}
+{#                <a class="ui primary button" href="/user/account">{{ current_user.full_name }}</a>#}
+{#            </div>#}
+{#            <div class="item">#}
+{#                <a class="ui default button" href="/user/signout">Sign out</a>#}
+{#            </div>#}
             <!-- User is not logged in -->
         {% else %}
             <div class="right menu">

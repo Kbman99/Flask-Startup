@@ -7,9 +7,12 @@ from app.core import db
 from app.forms import user as user_forms
 
 from flask_login import current_user
+from faker import Faker
 import json
 
 api = Blueprint('api', __name__, url_prefix='/api')
+
+fake = Faker()
 
 
 @api.route('/add/device/<device_type>', methods=['POST'])
@@ -33,7 +36,8 @@ def add_device(device_type):
                 .filter(Gateway.gateway_id == n_form.parent_gateway.data).first()
             if g:
                 n = Node(
-                    node_id=n_form.node_id.data
+                    node_id=n_form.node_id.data,
+                    status=0
                 )
                 db.session.add(n)
                 g.child_nodes.append(n)
@@ -98,6 +102,10 @@ def retrieve_data(id):
         return {}
 
 
+def gen_fake_coords(central_point):
+    return fake.geo_coordinate(central_point[0], 0.5), fake.geo_coordinate(central_point[1], 0.5)
+
+
 def generate_geojson(data):
     geo_json_schema = {
       "type": "FeatureCollection",
@@ -143,8 +151,32 @@ def get_stuff():
         node_id = data['dev_id']
         node = user.get_node(node_id)
         if node:
-            print("GOT IT!")
+            last_update = NodeInfo.query.filter(NodeInfo.parent_node == node.id) \
+                .order_by(NodeInfo.id.desc()).first()
+            if last_update:
+                last_status = last_update.status
+            else:
+                last_status = 0
 
+            ni = NodeInfo()
+            lat, long = gen_fake_coords([42, -71.8])
+            ni.lat = lat
+            ni.long = long
+            ni.timestamp = int(time.time())
+            new_status = data["payload_fields"]["status"]
+
+            if new_status != 0:
+                ni.status = new_status
+                node.status = new_status
+                if new_status == 3:
+                    node.status = 0
+                    ni.status = 0
+            else:
+                ni.status = last_status
+            print("GOT IT!")
+            db.session.add(ni)
+            node.node_info.append(ni)
+            db.session.commit()
     return jsonify(key=auth_key, data=request.get_json())
 
 

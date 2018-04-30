@@ -47,6 +47,20 @@ body {
    margin-top: 5% !important;
 }
 
+@media only screen and (min-width: 280px) and (max-width: 767px) {
+   .form-user-2 {
+   width: 100% !important;
+   margin: 0 auto !important;
+   margin-top: 5% !important;
+   }
+
+   .form-user-3 {
+   width: 100% !important;
+   margin: 0 auto !important;
+   margin-top: 5% !important;
+   }
+}
+
 .form-error {
    color: #E50000 !important;
 }
