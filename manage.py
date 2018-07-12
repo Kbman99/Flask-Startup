@@ -1,12 +1,10 @@
-# from flask.ext.script import Manager, prompt_bool, Shell, Server
 from termcolor import colored
-#
-# from app import app, db
+
 import click
 
-from app.core import db, bcrypt
+from app.core import db
 from app import create_app
-from app.models import User, Gateway, Node, NodeInfo
+#from app.models import User, Gateway, Node, NodeInfo
 
 import sys
 import time

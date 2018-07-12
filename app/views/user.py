@@ -38,10 +38,10 @@ def signup():
         # Generate a random token
         token = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).dumps(user.email, salt='email-confirm-key')
         # Build a confirm link with token
-        confirmUrl = url_for('user.confirm', token=token, _external=True)
+        confirm_url = url_for('user.confirm', token=token, _external=True)
         # Render an HTML template to send by email
         html = render_template('email/confirm.html',
-                               confirm_url=confirmUrl)
+                               confirm_url=confirm_url)
         # Send the email to user
         email.send(user.email, subject, html)
         # Send back to the home page
@@ -111,10 +111,10 @@ def resend():
             token = token = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])\
                 .dumps(user.email, salt='email-confirm-key')
             # Build a confirm link with token
-            confirmUrl = url_for('user.confirm', token=token, _external=True)
+            confirm_url = url_for('user.confirm', token=token, _external=True)
             # Render an HTML template to send by email
             html = render_template('email/confirm.html',
-                                   confirm_url=confirmUrl)
+                                   confirm_url=confirm_url)
             # Send the email to user
             email.send(user.email, subject, html)
             # Send back to the home page
@@ -146,9 +146,9 @@ def forgot():
             token = token = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])\
                 .dumps(user.email, salt='password-reset-key')
             # Build a reset link with token
-            resetUrl = url_for('user.reset', token=token, _external=True)
+            reset_url = url_for('user.reset', token=token, _external=True)
             # Render an HTML template to send by email
-            html = render_template('email/reset.html', reset_url=resetUrl)
+            html = render_template('email/reset.html', reset_url=reset_url)
             # Send the email to user
             email.send(user.email, subject, html)
             # Send back to the home page
