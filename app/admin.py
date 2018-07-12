@@ -6,7 +6,7 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.fileadmin import FileAdmin
 
-from app import app, db
+from app import db, app
 from app.models import User
 
 
@@ -14,7 +14,6 @@ admin = Admin(app, name='Admin', template_mode='bootstrap3')
 
 
 class ModelView(ModelView):
-
     def is_accessible(self):
         auth = request.authorization or request.environ.get('REMOTE_USER')  # workaround for Apache
         if not auth or (auth.username, auth.password) != app.config['ADMIN_CREDENTIALS']:

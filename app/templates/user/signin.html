@@ -7,18 +7,18 @@
 {% block content %}
 
 	<div class="ui form-user center raised very padded text container segment">
-		<form class="ui form" action="/user/signin" method="post">
+		<form class="ui form" action="{{ url_for('user.signin') }}" method="post">
 			<h4 class="ui dividing header">Login</h4>
 	    	{{ m.render_field(form.email) }}
 	    	{{ m.render_field(form.password) }}
 		  	{{ form.csrf_token }}
 		  	<button class="ui primary button" type="submit" id="submit">Confirm</button>
-		  	<a href="/user/forgot">
+		  	<a href="{{ url_for('user.forgot') }}">
 			  	<div class="ui floated right basic red button">
 	        		I forgot my password
 	    		</div>
 	    	</a>
-	    	<a href="/user/resend">
+	    	<a href="{{ url_for('user.resend') }}">
 	    		<div class="ui floated right basic red button">
 	        		Resend email verification
 	    		</div>

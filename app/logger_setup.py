@@ -28,7 +28,8 @@ from flask import request, session
 from structlog import wrap_logger
 from structlog.processors import JSONRenderer
 
-from app import app
+import app
+
 
 # Set the logging level
 app.logger.setLevel(app.config['LOG_LEVEL'])

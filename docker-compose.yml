@@ -1,14 +1,19 @@
-web:
-  restart: always
-  build: ./
-  expose:
-    - "8000"
-  command: /usr/local/bin/gunicorn -w 2 -b :8000 app:app
+version: "3"
+services:
+  web:
+    restart: always
+    build: ./
+    environment:
+      - FLASK_APP=manage.py
+      - FLASK_DEBUG=1
+    expose:
+      - "8000"
+    command: /usr/local/bin/gunicorn -w 2 -b :8000 app:create_app()
 
-nginx:
-  restart: always
-  build: ./nginx/
-  ports:
-    - "80:80"
-  links:
-    - web:web
+  nginx:
+    restart: always
+    build: ./nginx/
+    ports:
+      - "80:80"
+    links:
+      - web:web

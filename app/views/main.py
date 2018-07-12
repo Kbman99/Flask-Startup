@@ -1,24 +1,31 @@
-from flask import render_template
-from app import app, db, models
-import sys
+
+from flask import render_template, Blueprint, jsonify
 
 
-@app.route('/')
-@app.route('/index')
+home = Blueprint('home', __name__, '/', template_folder='../templates')
+
+
+@home.route('/')
+@home.route('/index')
 def index():
     return render_template('index.html', title='Home')
 
 
-@app.route('/contact')
+@home.route('/contact')
 def contact():
     return render_template('contact.html', title='Contact')
 
 
-@app.route('/faq')
+@home.route('/faq')
 def faq():
     return render_template('faq.html', title='FAQ')
 
 
-@app.route('/map')
+@home.route('/map')
 def map():
-    return render_template('realtime_map.html', title='Its a Map')
+    return render_template('realtime_map.html', title='Device Map')
+
+
+@home.route('/test')
+def test():
+    return jsonify()

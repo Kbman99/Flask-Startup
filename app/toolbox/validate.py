@@ -1,4 +1,4 @@
-from flask import jsonify, request, abort
+from flask import jsonify, request
 from functools import wraps
 from jsonschema import Draft4Validator
 
