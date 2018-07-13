@@ -2,19 +2,23 @@
 
 ## Setup
 
-### Vanilla
+### Simple Startup
 
 - Install the requirements and setup the development environment.
 
-	`make install && make dev`
+	`make install`
+	
+- Set entrypoint in environment variables
+
+    `export FLASK=manage.py`
 
 - Create the database.
 
-	`python manage.py initdb`
+	`flask initdb`
 
 - Run the application.
 
-	`python manage.py runserver`
+	`flask run`
 
 - Navigate to `localhost:5000`.
 
@@ -26,9 +30,9 @@ pip install virtualenv
 virtualenv venv
 venv/bin/activate (venv\scripts\activate on Windows)
 make install
-make dev
-python manage.py initdb
-python manage.py runserver
+export FLASK=manage.py
+flask initdb
+flask run
 ``
 
 
@@ -38,13 +42,12 @@ The current application can be deployed with Docker [in a few commands](https://
 
 ```sh
 cd ~/path/to/application/
-docker-machine create -d virtualbox --virtualbox-memory 512 --virtualbox-cpu-count 1 dev
+docker-machine create -d virtualbox --virtualbox-memory 1024 --virtualbox-cpu-count 1 dev
 docker-machine env dev
 eval "$(docker-machine env dev)"
 docker-compose build
+docker-compose web run flask initdb
 docker-compose up -d
-docker-compose run web make dev
-docker-compose run web python3 manage.py initdb
 ```
 
 Then access the IP address given by `docker-machine ip dev` and it should do the trick.
