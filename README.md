@@ -30,7 +30,7 @@ pip install virtualenv
 virtualenv venv
 venv/bin/activate (venv\scripts\activate on Windows)
 make install
-export FLASK=manage.py
+export FLASK_APP=manage.py
 flask initdb
 flask run
 ```
@@ -47,7 +47,7 @@ docker-machine env dev
 eval "$(docker-machine env dev)"
 docker-compose build
 docker-compose web run flask initdb
-docker-compose up -d
+docker-compose up
 ```
 
 Then access the IP address given by `docker-machine ip dev` and it should do the trick.
