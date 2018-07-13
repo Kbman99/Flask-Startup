@@ -25,7 +25,7 @@
 
 ### Virtual environment
 
-``sh
+```sh
 pip install virtualenv
 virtualenv venv
 venv/bin/activate (venv\scripts\activate on Windows)
@@ -33,7 +33,7 @@ make install
 export FLASK=manage.py
 flask initdb
 flask run
-``
+```
 
 
 ## Deployment
