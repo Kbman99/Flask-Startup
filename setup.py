@@ -1,0 +1,67 @@
+from setuptools import find_packages, setup
+
+setup(
+    name='Flask-Startup',
+    version='0.0.2',
+    description='Easy to use Flask boilerplate',
+    long_description='',
+    license='MIT',
+    author='Kbman99',
+    author_email='kylebowman99@gmail.com',
+    packages=find_packages(),
+    install_requires=[
+        'APScheduler==3.5.1',
+        'atomicwrites==1.1.5',
+        'attrs==18.1.0',
+        'bcrypt==3.1.4',
+        'beautifulsoup4==4.6.0',
+        'blinker==1.4',
+        'cffi==1.11.5',
+        'click==6.7',
+        'colorama==0.3.9',
+        'Flask==1.0.2',
+        'Flask-Admin==1.5.1',
+        'Flask-APScheduler==1.8.0',
+        'Flask-Bcrypt==0.7.1',
+        'Flask-DebugToolbar==0.10.1',
+        'Flask-Login==0.4.1',
+        'Flask-Mail==0.9.1',
+        'Flask-SQLAlchemy==2.3.2',
+        'Flask-WTF==0.14.2',
+        'gunicorn==19.9.0',
+        'itsdangerous==0.24',
+        'Jinja2==2.10',
+        'jsonschema==2.6.0',
+        'MarkupSafe==1.0',
+        'more-itertools==4.2.0',
+        'pluggy==0.6.0',
+        'py==1.5.4',
+        'pycparser==2.18',
+        'pytest==3.6.3',
+        'python-dateutil==2.7.3',
+        'pytz==2018.5',
+        'six==1.11.0',
+        'SQLAlchemy==1.2.9',
+        'structlog==18.1.0',
+        'termcolor==1.1.0',
+        'tzlocal==1.5.1',
+        'waitress==1.1.0',
+        'WebOb==1.8.2',
+        'WebTest==2.0.30',
+        'Werkzeug==0.14.1',
+        'WTForms==2.2.1'
+    ],
+    extras_require={
+        'dev': [
+            'pytest==3.6.3',
+            'pytest-runner==4.2'
+        ]
+    },
+    tests_require=[
+        'pytest',
+    ],
+    setup_requires=[
+        'pytest-runner'
+    ],
+    classifiers=[],
+)
