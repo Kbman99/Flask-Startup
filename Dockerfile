@@ -1,31 +1,22 @@
-FROM phusion/baseimage:0.9.19
+FROM ubuntu:18.04
 
-# Use baseimage-docker's init system.
-CMD ["/sbin/my_init"]
+# -- Install Pipenv:
+RUN apt update && apt install python3-pip git -y && pip3 install pipenv
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
 
-ENV TERM=xterm-256color
+# -- Install Application into container: RUN set -ex && mkdir /app
+WORKDIR /app
 
-# Set the locale
-RUN locale-gen en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+# -- Copy over Pipfile and Pipfile.lock
+COPY Pipfile Pipfile.lock /app/
 
-# Install necessary packages
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    python3-pip
+# -- Install dependencies:
+RUN set -ex
+RUN pipenv install --python 3.6 --system --deploy
 
-# Install Python requirements
-RUN mkdir -p /usr/src/app
-COPY requirements.txt /usr/src/app/
-RUN pip3 install --upgrade pip
-RUN pip3 install -r /usr/src/app/requirements.txt
+# --------------------
+# - Using This File: -
+# --------------------
 
-# Copy the files from the host to the container
-COPY . /usr/src/app
-WORKDIR /usr/src/app
-RUN chmod 777 -R *
-
-# Clean up
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+COPY . /app
