@@ -46,8 +46,8 @@ docker-machine create -d virtualbox --virtualbox-memory 1024 --virtualbox-cpu-co
 docker-machine env dev
 eval "$(docker-machine env dev)"
 docker-compose build
-docker-compose web run flask initdb
-docker-compose up
+docker-compose up -d (-d runs the containers detached so you can continue using the shell)
+docker-compose run web flask initdb --rm (remove container after running one off command)
 ```
 
 Then access the IP address given by `docker-machine ip dev` and it should do the trick.
