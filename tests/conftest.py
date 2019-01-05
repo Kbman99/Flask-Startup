@@ -16,7 +16,7 @@ def app_config():
     return settings
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.fixture(scope='session')
 def app(app_config):
     """The test application"""
     _app = create_app()

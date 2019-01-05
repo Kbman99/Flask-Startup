@@ -1,8 +1,8 @@
+from flask import Blueprint
+
 import importlib
 import pkgutil
-
 import os
-from flask import Blueprint
 
 
 def register_blueprints(app, package_name, package_path):

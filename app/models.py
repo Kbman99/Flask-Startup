@@ -40,18 +40,3 @@ class User(db.Model, UserMixin):
 
     def get_id(self):
         return self.id
-
-
-
-# class AuthorizedClients(db.Model):
-#
-#     """ A client which is authorized to use the webhook system """
-#
-#     __tablename__ = 'authorized_clients'
-#
-#     client_ip = db.Column(db.String, primary_key=True)
-#     pub_time = db.Column(db.DateTime(timezone=True), default=func.now(), nullable=False)
-#
-#     @property
-#     def ip(self):
-#         return '{}'.format(self.client_ip)
